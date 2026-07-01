@@ -1,0 +1,11 @@
+{
+  "name": "geetha-online",
+  "version": "1.0.0",
+  "description": "Geetha Online - Toddy Delivery App (MERN Stack)",
+  "scripts": {
+    "dev:backend":  "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "seed":         "cd backend && npm run seed",
+    "install:all":  "cd backend && npm install && cd ../frontend && npm install"
+  }
+}

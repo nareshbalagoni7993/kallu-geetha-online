@@ -1,0 +1,64 @@
+import { useEffect, useState } from 'react';
+import API from '../../api/axios';
+import Spinner from '../../components/Spinner';
+import OrderStatusBadge from '../../components/OrderStatusBadge';
+
+export default function SAManageOrders() {
+  const [orders, setOrders]   = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter]   = useState('all');
+
+  useEffect(() => {
+    API.get('/superadmin/orders').then((r) => setOrders(r.data)).finally(() => setLoading(false));
+  }, []);
+
+  const filtered = filter === 'all' ? orders : orders.filter((o) => o.status === filter);
+
+  if (loading) return <Spinner size="lg" />;
+
+  return (
+    <div>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">All Orders ({orders.length})</h1>
+
+      <div className="flex gap-2 mb-6 flex-wrap">
+        {['all','pending','confirmed','preparing','out_for_delivery','delivered','cancelled'].map((s) => (
+          <button key={s} onClick={() => setFilter(s)}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium capitalize transition-colors ${filter === s ? 'bg-primary text-white' : 'bg-white text-gray-600 border hover:bg-gray-50'}`}>
+            {s.replace(/_/g, ' ')}
+          </button>
+        ))}
+      </div>
+
+      <div className="card overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-gray-50 border-b">
+            <tr>
+              <th className="text-left p-4 font-medium text-gray-600">Order #</th>
+              <th className="text-left p-4 font-medium text-gray-600">Customer</th>
+              <th className="text-left p-4 font-medium text-gray-600">Shop</th>
+              <th className="text-left p-4 font-medium text-gray-600">Items</th>
+              <th className="text-left p-4 font-medium text-gray-600">Amount</th>
+              <th className="text-left p-4 font-medium text-gray-600">Status</th>
+              <th className="text-left p-4 font-medium text-gray-600">Date</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {filtered.length === 0 ? (
+              <tr><td colSpan={7} className="text-center py-8 text-gray-400">No orders</td></tr>
+            ) : filtered.map((o) => (
+              <tr key={o._id} className="hover:bg-gray-50">
+                <td className="p-4 font-mono text-xs text-gray-500">{o.orderNumber}</td>
+                <td className="p-4"><div className="font-medium">{o.user?.name}</div><div className="text-gray-400 text-xs">{o.user?.phone}</div></td>
+                <td className="p-4">{o.shop?.name}</td>
+                <td className="p-4">{o.items?.length} item(s)</td>
+                <td className="p-4 font-semibold">₹{o.grandTotal}</td>
+                <td className="p-4"><OrderStatusBadge status={o.status} /></td>
+                <td className="p-4 text-gray-500 text-xs">{new Date(o.createdAt).toLocaleDateString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
