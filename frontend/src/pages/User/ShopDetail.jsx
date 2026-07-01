@@ -164,7 +164,7 @@ export default function ShopDetail() {
               </div>
 
               {/* Image side */}
-              <div className={`w-36 h-auto flex-shrink-0 bg-gradient-to-br ${bg} flex items-center justify-center relative overflow-hidden`}>
+              <div className={`w-24 sm:w-36 h-auto flex-shrink-0 bg-gradient-to-br ${bg} flex items-center justify-center relative overflow-hidden`}>
                 {p.image ? (
                   <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
                 ) : (

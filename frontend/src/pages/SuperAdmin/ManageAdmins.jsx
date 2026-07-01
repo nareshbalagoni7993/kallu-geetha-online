@@ -189,7 +189,8 @@ export default function SAManageAdmins() {
 
       {/* Admins Table */}
       <div className="card overflow-hidden">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[700px]">
           <thead className="bg-gray-50 border-b">
             <tr>
               <th className="text-left p-4 font-medium text-gray-600">Admin</th>
@@ -234,6 +235,7 @@ export default function SAManageAdmins() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

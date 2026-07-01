@@ -32,8 +32,8 @@ function ShopDrawer({ shopId, onClose }) {
       {/* Backdrop */}
       <div className="fixed inset-0 bg-black/40 z-40 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Drawer */}
-      <div className="fixed right-0 top-0 h-full w-full max-w-xl bg-white z-50 shadow-2xl flex flex-col overflow-hidden animate-slide-in">
+      {/* Drawer — full-width on mobile, max-xl on desktop */}
+      <div className="fixed right-0 top-0 h-full w-full sm:max-w-xl bg-white z-50 shadow-2xl flex flex-col overflow-hidden animate-slide-in">
         {/* Header */}
         <div className="bg-gradient-to-r from-green-800 to-amber-700 p-5 text-white flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-3">
@@ -271,7 +271,8 @@ export default function SAManageShops() {
       <p className="text-sm text-gray-400 mb-5">Click any shop name to view full details, orders, stock & revenue</p>
 
       <div className="card overflow-hidden">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[640px]">
           <thead className="bg-gray-50 border-b">
             <tr>
               <th className="text-left p-4 font-medium text-gray-600">Shop</th>
@@ -317,6 +318,7 @@ export default function SAManageShops() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       {drawerShopId && (

@@ -91,32 +91,32 @@ export default function Home() {
   return (
     <div>
       {/* Hero */}
-      <div className="bg-gradient-to-br from-green-800 via-green-700 to-amber-800 rounded-2xl p-7 mb-6 text-white relative overflow-hidden">
-        <div className="absolute right-4 top-2 text-8xl opacity-10 select-none pointer-events-none">🌴</div>
-        <h1 className="text-3xl font-bold mb-1 relative">🌴 Fresh Toddy Delivered!</h1>
-        <p className="text-green-200 mb-4 relative">Palm Toddy · Palm Water · Ice · Apples & More</p>
+      <div className="bg-gradient-to-br from-green-800 via-green-700 to-amber-800 rounded-2xl p-4 sm:p-7 mb-6 text-white relative overflow-hidden">
+        <div className="absolute right-4 top-2 text-7xl sm:text-8xl opacity-10 select-none pointer-events-none">🌴</div>
+        <h1 className="text-xl sm:text-3xl font-bold mb-1 relative">🌴 Fresh Toddy Delivered!</h1>
+        <p className="text-green-200 text-sm mb-3 relative">Palm Toddy · Palm Water · Ice · Apples & More</p>
         {locMsg && (
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex flex-wrap items-center gap-2 mb-3">
             <span className="text-green-300 text-xs">{locMsg}</span>
             {userCoords && <span className="text-green-400 text-xs">· Sorted by distance</span>}
           </div>
         )}
-        <form onSubmit={handleSearch} className="flex gap-2 max-w-lg mb-3 relative">
+        <form onSubmit={handleSearch} className="flex gap-2 mb-3 relative">
           <input value={search} onChange={(e) => setSearch(e.target.value)}
-            className="flex-1 rounded-xl px-4 py-3 text-gray-800 text-sm focus:outline-none shadow-inner"
-            placeholder="Search shops by name or city..." />
+            className="flex-1 rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-gray-800 text-sm focus:outline-none shadow-inner min-w-0"
+            placeholder="Search shops..." />
           {search && (
             <button type="button" onClick={clearSearch}
-              className="bg-white/20 hover:bg-white/30 text-white px-3 py-3 rounded-xl text-sm transition-colors">✕</button>
+              className="bg-white/20 hover:bg-white/30 text-white px-3 py-2.5 rounded-xl text-sm transition-colors flex-shrink-0">✕</button>
           )}
           <button type="submit" disabled={searching}
-            className="bg-secondary hover:bg-secondary-dark text-white px-5 py-3 rounded-xl font-medium text-sm transition-colors disabled:opacity-60 shadow">
-            {searching ? '⏳' : '🔍 Search'}
+            className="bg-secondary hover:bg-secondary-dark text-white px-3 sm:px-5 py-2.5 rounded-xl font-medium text-sm transition-colors disabled:opacity-60 shadow flex-shrink-0">
+            {searching ? '⏳' : '🔍'}
           </button>
         </form>
         <button onClick={detectLocation} disabled={locLoading}
-          className="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white text-xs px-4 py-2 rounded-full transition-colors disabled:opacity-60 border border-white/20">
-          {locLoading ? '⏳ Detecting...' : '📍 Detect My Location & Sort by Distance'}
+          className="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white text-xs px-3 py-2 rounded-full transition-colors disabled:opacity-60 border border-white/20">
+          {locLoading ? '⏳ Detecting...' : '📍 Detect Location'}
         </button>
       </div>
 

@@ -195,7 +195,8 @@ export default function ManageProducts() {
 
       {/* Products Table */}
       <div className="card overflow-hidden">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[640px]">
           <thead className="bg-gray-50 border-b">
             <tr>
               <th className="text-left p-4 font-medium text-gray-600">Image</th>
@@ -248,6 +249,7 @@ export default function ManageProducts() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

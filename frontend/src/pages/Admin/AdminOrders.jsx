@@ -98,7 +98,7 @@ export default function AdminOrders() {
             </div>
 
             {/* Actions */}
-            <div className="flex gap-3">
+            <div className="flex flex-wrap gap-2">
               {NEXT_STATUS[o.status] && (
                 <button onClick={() => handleStatus(o._id, NEXT_STATUS[o.status])}
                   className="btn-primary text-sm">

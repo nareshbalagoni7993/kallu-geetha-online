@@ -97,7 +97,7 @@ export default function Cart() {
       {/* Payment */}
       <div className="card p-5 mb-6">
         <h2 className="font-semibold text-gray-800 mb-3">💳 Payment Method</h2>
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3">
           {[{ value: 'cod', label: '💵 Cash on Delivery' }, { value: 'online', label: '📱 Online Payment' }].map((p) => (
             <label key={p.value} className={`flex items-center gap-2 cursor-pointer border-2 rounded-lg px-4 py-3 flex-1 transition-colors ${paymentMethod === p.value ? 'border-primary bg-green-50' : 'border-gray-200'}`}>
               <input type="radio" name="payment" value={p.value} checked={paymentMethod === p.value}

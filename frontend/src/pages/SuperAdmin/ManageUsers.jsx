@@ -20,14 +20,15 @@ export default function SAManageUsers() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Users ({users.length})</h1>
-        <input className="input-field w-64" placeholder="Search name or email..." value={search}
+        <input className="input-field w-full sm:w-64" placeholder="Search name or email..." value={search}
           onChange={(e) => setSearch(e.target.value)} />
       </div>
 
       <div className="card overflow-hidden">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[500px]">
           <thead className="bg-gray-50 border-b">
             <tr>
               <th className="text-left p-4 font-medium text-gray-600">Name</th>
@@ -51,6 +52,7 @@ export default function SAManageUsers() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );
