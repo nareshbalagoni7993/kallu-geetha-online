@@ -26,7 +26,7 @@ export default function Spinner({ size = 'md', text = '' }) {
           style={{ width: imgSize, height: imgSize }}
         >
           <img
-            src="/palm-tree.png"
+            src="/palm-tree.jpg"
             alt="Loading"
             className="w-full h-full object-cover"
           />
