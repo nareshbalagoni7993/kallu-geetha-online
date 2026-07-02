@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import API from '../../api/axios';
 import Spinner from '../../components/Spinner';
+import { useLang } from '../../context/LanguageContext';
 
 export default function SAManageUsers() {
+  const { t }                 = useLang();
   const [users, setUsers]     = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch]   = useState('');
@@ -21,8 +23,8 @@ export default function SAManageUsers() {
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Users ({users.length})</h1>
-        <input className="input-field w-full sm:w-64" placeholder="Search name or email..." value={search}
+        <h1 className="text-2xl font-bold text-gray-800">{t('manageUsers')} ({users.length})</h1>
+        <input className="input-field w-full sm:w-64" placeholder={`${t('search')}...`} value={search}
           onChange={(e) => setSearch(e.target.value)} />
       </div>
 
@@ -31,11 +33,11 @@ export default function SAManageUsers() {
         <table className="w-full text-sm min-w-[500px]">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="text-left p-4 font-medium text-gray-600">Name</th>
-              <th className="text-left p-4 font-medium text-gray-600">Email</th>
-              <th className="text-left p-4 font-medium text-gray-600">Phone</th>
-              <th className="text-left p-4 font-medium text-gray-600">City</th>
-              <th className="text-left p-4 font-medium text-gray-600">Joined</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('name')}</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('email')}</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('phone')}</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('location')}</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('time')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">

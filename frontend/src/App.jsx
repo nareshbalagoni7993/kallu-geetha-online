@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import { LanguageProvider } from './context/LanguageContext';
 
 import Login    from './pages/Auth/Login';
 import Register from './pages/Auth/Register';
@@ -43,6 +44,7 @@ function RoleRedirect() {
 
 export default function App() {
   return (
+    <LanguageProvider>
     <BrowserRouter>
       <Routes>
         <Route path="/"         element={<RoleRedirect />} />
@@ -84,5 +86,6 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
+    </LanguageProvider>
   );
 }

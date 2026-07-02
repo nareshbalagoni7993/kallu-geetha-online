@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import API from '../../api/axios';
 import Spinner from '../../components/Spinner';
+import { useLang } from '../../context/LanguageContext';
 import toast from 'react-hot-toast';
 import { DISTRICTS } from '../../data/telangana';
 
@@ -11,6 +12,7 @@ const emptyForm = {
 };
 
 export default function SAManageAdmins() {
+  const { t }                       = useLang();
   const [admins, setAdmins]         = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading]       = useState(true);
@@ -59,9 +61,9 @@ export default function SAManageAdmins() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Manage Admins ({admins.length})</h1>
+        <h1 className="text-2xl font-bold text-gray-800">{t('manageAdmins')} ({admins.length})</h1>
         <button onClick={() => { setShowForm(!showForm); setForm(emptyForm); }} className="btn-primary">
-          {showForm ? 'Cancel' : '+ Create Admin'}
+          {showForm ? t('cancel') : t('createAdmin')}
         </button>
       </div>
 
@@ -195,18 +197,18 @@ export default function SAManageAdmins() {
         <table className="w-full text-sm min-w-[700px]">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="text-left p-4 font-medium text-gray-600">Admin</th>
-              <th className="text-left p-4 font-medium text-gray-600">Email</th>
-              <th className="text-left p-4 font-medium text-gray-600">Phone</th>
-              <th className="text-left p-4 font-medium text-gray-600">Shop</th>
-              <th className="text-left p-4 font-medium text-gray-600">Location</th>
-              <th className="text-left p-4 font-medium text-gray-600">Status</th>
-              <th className="text-left p-4 font-medium text-gray-600">Action</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('name')}</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('email')}</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('phone')}</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('shop')}</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('location')}</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('status')}</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('action')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
             {admins.length === 0 ? (
-              <tr><td colSpan={7} className="text-center py-10 text-gray-400">No admins yet. Create one above.</td></tr>
+              <tr><td colSpan={7} className="text-center py-10 text-gray-400">{t('noAdmins')}</td></tr>
             ) : admins.map((a) => (
               <tr key={a._id} className="hover:bg-gray-50">
                 <td className="p-4 font-medium">{a.name}</td>
@@ -227,13 +229,13 @@ export default function SAManageAdmins() {
                 </td>
                 <td className="p-4">
                   <span className={a.isActive ? 'badge-green' : 'badge-red'}>
-                    {a.isActive ? 'Active' : 'Inactive'}
+                    {a.isActive ? t('active') : t('inactive')}
                   </span>
                 </td>
                 <td className="p-4">
                   <button onClick={() => handleToggle(a._id)}
                     className={`text-xs px-3 py-1 rounded-full font-medium transition-colors ${a.isActive ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-green-100 text-green-600 hover:bg-green-200'}`}>
-                    {a.isActive ? 'Deactivate' : 'Activate'}
+                    {a.isActive ? t('deactivate') : t('activate')}
                   </button>
                 </td>
               </tr>

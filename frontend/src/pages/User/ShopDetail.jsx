@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import API from '../../api/axios';
 import Spinner from '../../components/Spinner';
 import { useCart } from '../../context/CartContext';
+import { useLang } from '../../context/LanguageContext';
 import toast from 'react-hot-toast';
 
 const CATEGORY_ICONS = {
@@ -17,6 +18,7 @@ const PRODUCT_BG = [
 ];
 
 export default function ShopDetail() {
+  const { t }      = useLang();
   const { id }     = useParams();
   const navigate   = useNavigate();
   const { cart, addToCart, removeFromCart, totalItems, totalAmount, shopId } = useCart();
@@ -65,7 +67,7 @@ export default function ShopDetail() {
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
           <span className={`absolute top-4 right-4 px-3 py-1 rounded-full text-sm font-semibold shadow ${shop.isOpen ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
-            {shop.isOpen ? '🟢 Open' : '🔴 Closed'}
+            {shop.isOpen ? `🟢 ${t('openStatus')}` : `🔴 ${t('closedStatus')}`}
           </span>
         </div>
         <div className="p-5">
@@ -83,10 +85,10 @@ export default function ShopDetail() {
             </div>
             {shop.deliveryCharge > 0
               ? <div className="flex items-center gap-1.5 bg-gray-50 px-3 py-1.5 rounded-full">
-                  <span>🚚</span><span className="text-sm font-semibold text-gray-700">₹{shop.deliveryCharge} delivery</span>
+                  <span>🚚</span><span className="text-sm font-semibold text-gray-700">₹{shop.deliveryCharge} {t('delivery')}</span>
                 </div>
               : <div className="flex items-center gap-1.5 bg-green-50 px-3 py-1.5 rounded-full">
-                  <span>🚚</span><span className="text-sm font-semibold text-green-700">Free Delivery</span>
+                  <span>🚚</span><span className="text-sm font-semibold text-green-700">{t('freeDelivery')}</span>
                 </div>}
           </div>
           {shop.minOrder > 0 && (
@@ -113,7 +115,7 @@ export default function ShopDetail() {
         {filtered.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
             <div className="text-4xl mb-2">🍺</div>
-            <p>No products in this category</p>
+            <p>{t('noProducts')}</p>
           </div>
         ) : filtered.map((p, idx) => {
           const qty = getQty(p._id);
@@ -145,11 +147,11 @@ export default function ShopDetail() {
                     )}
                   </div>
                   {!p.inStock ? (
-                    <span className="text-xs bg-red-100 text-red-600 px-3 py-1.5 rounded-full font-medium">Out of stock</span>
+                    <span className="text-xs bg-red-100 text-red-600 px-3 py-1.5 rounded-full font-medium">{t('outOfStock')}</span>
                   ) : qty === 0 ? (
                     <button onClick={() => handleAdd(p)}
                       className="px-6 py-2 border-2 border-primary text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all text-sm active:scale-95">
-                      ADD
+                      {t('addToCart')}
                     </button>
                   ) : (
                     <div className="flex items-center gap-0 border-2 border-primary rounded-xl overflow-hidden w-fit">
@@ -185,7 +187,7 @@ export default function ShopDetail() {
             className="bg-primary text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 font-semibold text-base hover:bg-primary-dark transition-all active:scale-95 w-full max-w-sm justify-between">
             <div className="flex items-center gap-3">
               <span className="bg-white text-primary rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">{totalItems}</span>
-              <span>View Cart</span>
+              <span>{t('viewCart')}</span>
             </div>
             <span className="font-bold text-lg">₹{totalAmount}</span>
           </button>

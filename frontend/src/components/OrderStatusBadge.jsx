@@ -1,13 +1,17 @@
-const STATUS = {
-  pending:          { label: 'Pending',          cls: 'badge-yellow' },
-  confirmed:        { label: 'Confirmed',        cls: 'badge-blue' },
-  preparing:        { label: 'Preparing',        cls: 'badge-blue' },
-  out_for_delivery: { label: 'Out for Delivery', cls: 'badge-blue' },
-  delivered:        { label: 'Delivered',        cls: 'badge-green' },
-  cancelled:        { label: 'Cancelled',        cls: 'badge-red' },
+import { useLang } from '../context/LanguageContext';
+
+const STATUS_CLS = {
+  pending:          'badge-yellow',
+  confirmed:        'badge-blue',
+  preparing:        'badge-blue',
+  out_for_delivery: 'badge-blue',
+  delivered:        'badge-green',
+  cancelled:        'badge-red',
 };
 
 export default function OrderStatusBadge({ status }) {
-  const s = STATUS[status] || { label: status, cls: 'badge-yellow' };
-  return <span className={s.cls}>{s.label}</span>;
+  const { t } = useLang();
+  const cls = STATUS_CLS[status] || 'badge-yellow';
+  const label = t(`status_${status}`) || status?.replace(/_/g, ' ');
+  return <span className={cls}>{label}</span>;
 }

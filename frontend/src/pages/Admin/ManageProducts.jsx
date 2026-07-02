@@ -1,19 +1,24 @@
 import { useEffect, useRef, useState } from 'react';
 import API from '../../api/axios';
 import Spinner from '../../components/Spinner';
+import ConfirmModal from '../../components/ConfirmModal';
+import { useLang } from '../../context/LanguageContext';
 import toast from 'react-hot-toast';
 
 const CATEGORIES = ['Palm Toddy', 'Sweet Toddy', 'Palm Water', 'Palm Ice', 'Apples', 'Palm Jaggery', 'Palm Sugar', 'Other'];
 const emptyForm  = { name: '', description: '', price: '', originalPrice: '', category: 'Palm Toddy', quantity: '', isVeg: true, stockQty: '' };
 
 export default function ManageProducts() {
+  const { t }                   = useLang();
   const [products, setProducts] = useState([]);
   const [loading, setLoading]   = useState(true);
   const [form, setForm]         = useState(emptyForm);
   const [editId, setEditId]     = useState(null);
-  const [saving, setSaving]     = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [imageFile, setImageFile] = useState(null);
+  const [saving, setSaving]         = useState(false);
+  const [showForm, setShowForm]     = useState(false);
+  const [deleteId, setDeleteId]     = useState(null);
+  const [deleting, setDeleting]     = useState(false);
+  const [imageFile, setImageFile]   = useState(null);
   const [imagePreview, setImagePreview] = useState('');
   const fileRef = useRef();
 
@@ -65,10 +70,12 @@ export default function ManageProducts() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('Delete this product?')) return;
-    try { await API.delete(`/admin/product/${id}`); toast.success('Deleted'); fetchProducts(); }
+  const handleDelete = async () => {
+    if (!deleteId) return;
+    setDeleting(true);
+    try { await API.delete(`/admin/product/${deleteId}`); toast.success('Deleted'); fetchProducts(); setDeleteId(null); }
     catch { toast.error('Failed'); }
+    finally { setDeleting(false); }
   };
 
   const handleToggleStock = async (id) => {
@@ -85,9 +92,9 @@ export default function ManageProducts() {
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold text-gray-800">Manage Products</h1>
+        <h1 className="text-2xl font-bold text-gray-800">{t('manageProducts')}</h1>
         <button onClick={() => { resetForm(); setShowForm(!showForm); }} className="btn-primary">
-          {showForm ? 'Cancel' : '+ Add Product'}
+          {showForm ? t('cancel') : t('addProduct')}
         </button>
       </div>
 
@@ -110,7 +117,7 @@ export default function ManageProducts() {
       {/* Add / Edit Form */}
       {showForm && (
         <div className="card p-6 mb-6">
-          <h2 className="text-lg font-semibold mb-4">{editId ? 'Edit Product' : 'Add New Product'}</h2>
+          <h2 className="text-lg font-semibold mb-4">{editId ? t('editProduct') : t('addProduct')}</h2>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
             {/* Image Upload */}
@@ -185,9 +192,9 @@ export default function ManageProducts() {
             </div>
             <div className="flex gap-3 items-center md:col-span-2">
               <button type="submit" disabled={saving} className="btn-primary px-8 disabled:opacity-60">
-                {saving ? 'Saving...' : editId ? '✓ Update Product' : '+ Add Product'}
+                {saving ? t('loading') : editId ? `✓ ${t('update')}` : `+ ${t('addProductBtn')}`}
               </button>
-              <button type="button" onClick={resetForm} className="btn-outline">Cancel</button>
+              <button type="button" onClick={resetForm} className="btn-outline">{t('cancel')}</button>
             </div>
           </form>
         </div>
@@ -242,8 +249,8 @@ export default function ManageProducts() {
                   </button>
                 </td>
                 <td className="p-4 flex gap-2">
-                  <button onClick={() => handleEdit(p)} className="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-medium hover:bg-blue-200">Edit</button>
-                  <button onClick={() => handleDelete(p._id)} className="text-xs px-3 py-1 bg-red-100 text-red-600 rounded-full font-medium hover:bg-red-200">Del</button>
+                  <button onClick={() => handleEdit(p)} className="text-xs px-3 py-1 bg-blue-100 text-blue-700 rounded-full font-medium hover:bg-blue-200">{t('edit')}</button>
+                  <button onClick={() => setDeleteId(p._id)} className="text-xs px-3 py-1 bg-red-100 text-red-600 rounded-full font-medium hover:bg-red-200">{t('delete')}</button>
                 </td>
               </tr>
             ))}
@@ -251,6 +258,18 @@ export default function ManageProducts() {
         </table>
         </div>
       </div>
+
+      {deleteId && (
+        <ConfirmModal
+          title={t('deleteProduct')}
+          message={`${t('deleteProduct')}?`}
+          confirmLabel={t('delete')}
+          confirmColor="red"
+          loading={deleting}
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteId(null)}
+        />
+      )}
     </div>
   );
 }

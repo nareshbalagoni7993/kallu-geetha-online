@@ -3,6 +3,8 @@ import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 import useAdminSocket from '../../hooks/useAdminSocket';
+import LangToggle from '../../components/LangToggle';
+import { useLang } from '../../context/LanguageContext';
 
 const navItems = [
   { to: '/admin',          label: 'Dashboard', icon: '📊', end: true },
@@ -123,6 +125,7 @@ export default function AdminLayout() {
   const notifRef   = useRef(null);
   const profileRef = useRef(null);
 
+  const { t } = useLang();
   const { notifications, unreadCount, markAllRead, clearAll, requestPermission, reload } =
     useAdminSocket(user?._id, user?.role);
 
@@ -267,6 +270,8 @@ export default function AdminLayout() {
                 {new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' })}
               </p>
             </div>
+
+            <LangToggle dark />
 
             {/* Notification Bell */}
             <div className="relative" ref={notifRef}>

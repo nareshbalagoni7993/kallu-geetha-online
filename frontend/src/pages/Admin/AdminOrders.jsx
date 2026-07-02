@@ -3,6 +3,7 @@ import API from '../../api/axios';
 import Spinner from '../../components/Spinner';
 import OrderStatusBadge from '../../components/OrderStatusBadge';
 import ConfirmModal from '../../components/ConfirmModal';
+import { useLang } from '../../context/LanguageContext';
 import toast from 'react-hot-toast';
 
 const NEXT_STATUS = {
@@ -10,12 +11,6 @@ const NEXT_STATUS = {
   confirmed:        'preparing',
   preparing:        'out_for_delivery',
   out_for_delivery: 'delivered',
-};
-const STATUS_LABELS = {
-  confirmed:        '✓ Confirm',
-  preparing:        '🍺 Start Preparing',
-  out_for_delivery: '🛵 Out for Delivery',
-  delivered:        '✅ Mark Delivered',
 };
 const STATUS_COLORS = {
   pending: 'bg-yellow-50 border-yellow-200',
@@ -42,13 +37,9 @@ function timeAgo(iso) {
 }
 
 const FILTERS = ['all','pending','confirmed','preparing','out_for_delivery','delivered','cancelled'];
-const FILTER_LABELS = {
-  all: 'All', pending: '⏳ Pending', confirmed: '✅ Confirmed',
-  preparing: '🍺 Preparing', out_for_delivery: '🛵 On the Way',
-  delivered: '🎉 Delivered', cancelled: '❌ Cancelled',
-};
 
 export default function AdminOrders() {
+  const { t }                   = useLang();
   const [orders, setOrders]     = useState([]);
   const [loading, setLoading]   = useState(true);
   const [filter, setFilter]     = useState('all');
@@ -103,32 +94,35 @@ export default function AdminOrders() {
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Shop Orders</h1>
-          <p className="text-sm text-gray-400 mt-0.5">{orders.length} total orders</p>
+          <h1 className="text-2xl font-bold text-gray-800">{t('shopOrders')}</h1>
+          <p className="text-sm text-gray-400 mt-0.5">{orders.length} {t('totalOrders')}</p>
         </div>
         <button onClick={fetchOrders}
           className="text-sm px-4 py-2 bg-amber-50 text-amber-700 border border-amber-200 rounded-xl hover:bg-amber-100 font-medium transition-colors">
-          ↻ Refresh
+          {t('refresh')}
         </button>
       </div>
 
       {/* Filter pills */}
       <div className="flex gap-2 mb-6 flex-wrap">
-        {FILTERS.map((s) => (
+        {FILTERS.map((s) => {
+          const filterLabel = s === 'all' ? t('all') : s === 'pending' ? `⏳ ${t('status_pending')}` : s === 'confirmed' ? `✅ ${t('status_confirmed')}` : s === 'preparing' ? `🍺 ${t('status_preparing')}` : s === 'out_for_delivery' ? `🛵 ${t('status_out_for_delivery')}` : s === 'delivered' ? `🎉 ${t('status_delivered')}` : `❌ ${t('status_cancelled')}`;
+          return (
           <button key={s} onClick={() => setFilter(s)}
             className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
               filter === s
                 ? 'bg-amber-700 text-white shadow-sm'
                 : 'bg-white text-gray-500 border hover:border-amber-300 hover:text-amber-700'
             }`}>
-            {FILTER_LABELS[s]}
+            {filterLabel}
             {counts[s] > 0 && (
               <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${filter === s ? 'bg-white/30 text-white' : 'bg-gray-100 text-gray-500'}`}>
                 {counts[s]}
               </span>
             )}
           </button>
-        ))}
+          );
+        })}
       </div>
 
       {/* Orders */}
@@ -136,8 +130,8 @@ export default function AdminOrders() {
         {orders.length === 0 ? (
           <div className="card p-16 text-center text-gray-400">
             <div className="text-6xl mb-4">📦</div>
-            <p className="text-lg font-medium">No orders found</p>
-            <p className="text-sm mt-1">Orders will appear here when customers place them</p>
+            <p className="text-lg font-medium">{t('noOrdersAdmin')}</p>
+            <p className="text-sm mt-1">{t('noOrdersAdminMsg')}</p>
           </div>
         ) : orders.map((o) => {
           const delivLat = o.deliveryAddress?.lat;
@@ -214,10 +208,10 @@ export default function AdminOrders() {
                     <div className="flex items-center gap-3 px-3 py-2 bg-orange-50">
                       <span className="text-lg">🛵</span>
                       <div className="flex-1">
-                        <p className="text-xs font-bold text-orange-700">Delivery in Progress</p>
+                        <p className="text-xs font-bold text-orange-700">{t('deliveryInProgress')}</p>
                         {dist
-                          ? <p className="text-xs text-orange-600">📍 {dist} km to customer · ~{Math.ceil(Number(dist)*4)} min ETA</p>
-                          : <p className="text-xs text-orange-500">Distance unavailable (no GPS coordinates)</p>}
+                          ? <p className="text-xs text-orange-600">📍 {dist} km {t('toCustomer')} · ~{Math.ceil(Number(dist)*4)} {t('minETA')}</p>
+                          : <p className="text-xs text-orange-500">{t('noGPS')}</p>}
                       </div>
                     </div>
                     {delivLat && delivLng && (
@@ -236,13 +230,13 @@ export default function AdminOrders() {
                   {NEXT_STATUS[o.status] && (
                     <button onClick={() => handleStatus(o._id, NEXT_STATUS[o.status])}
                       className="btn-primary text-sm py-2 px-4 flex items-center gap-1.5">
-                      {STATUS_LABELS[NEXT_STATUS[o.status]]}
+                      {NEXT_STATUS[o.status] === 'confirmed' ? t('confirmOrder') : NEXT_STATUS[o.status] === 'preparing' ? t('startPreparing') : NEXT_STATUS[o.status] === 'out_for_delivery' ? t('outForDelivery') : t('markDelivered')}
                     </button>
                   )}
                   {['pending','confirmed'].includes(o.status) && (
                     <button onClick={() => setCancelOrder(o._id)}
                       className="text-sm px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 rounded-xl font-medium transition-colors">
-                      ✕ Cancel
+                      {t('cancelOrderBtn')}
                     </button>
                   )}
                 </div>
@@ -255,9 +249,9 @@ export default function AdminOrders() {
       {/* Cancel Confirm Modal */}
       {cancelOrder && (
         <ConfirmModal
-          title="Cancel Order?"
-          message="This will cancel the order. The customer will be notified. This action cannot be undone."
-          confirmLabel="Yes, Cancel Order"
+          title={t('cancelOrderTitle')}
+          message={t('cancelOrderAdminMsg')}
+          confirmLabel={t('yesCancelOrder')}
           confirmColor="red"
           loading={cancelling}
           onConfirm={confirmCancel}

@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import API from '../../api/axios';
 import Spinner from '../../components/Spinner';
 import OrderStatusBadge from '../../components/OrderStatusBadge';
+import { useLang } from '../../context/LanguageContext';
 
 /* ══════════════════════════════════════════════════
    WEATHER (reused from Admin dashboard)
@@ -183,6 +184,7 @@ const timeAgo = (iso) => {
    MAIN SUPER ADMIN DASHBOARD
 ══════════════════════════════════════════════════ */
 export default function SADashboard() {
+  const { t }               = useLang();
   const [data, setData]     = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -195,12 +197,12 @@ export default function SADashboard() {
 
   const statusList = ['pending','confirmed','preparing','out_for_delivery','delivered','cancelled'];
   const statusCfg  = {
-    pending:          { color: 'bg-yellow-400', label: '⏳ Pending' },
-    confirmed:        { color: 'bg-blue-400',   label: '✅ Confirmed' },
-    preparing:        { color: 'bg-purple-400', label: '🍺 Preparing' },
-    out_for_delivery: { color: 'bg-orange-400', label: '🛵 Out for Delivery' },
-    delivered:        { color: 'bg-green-500',  label: '🎉 Delivered' },
-    cancelled:        { color: 'bg-red-400',    label: '❌ Cancelled' },
+    pending:          { color: 'bg-yellow-400', label: `⏳ ${t('status_pending')}` },
+    confirmed:        { color: 'bg-blue-400',   label: `✅ ${t('status_confirmed')}` },
+    preparing:        { color: 'bg-purple-400', label: `🍺 ${t('status_preparing')}` },
+    out_for_delivery: { color: 'bg-orange-400', label: `🛵 ${t('status_out_for_delivery')}` },
+    delivered:        { color: 'bg-green-500',  label: `🎉 ${t('status_delivered')}` },
+    cancelled:        { color: 'bg-red-400',    label: `❌ ${t('status_cancelled')}` },
   };
 
   return (
@@ -222,18 +224,18 @@ export default function SADashboard() {
 
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <KpiCard title="Total Revenue"  value={`₹${(data.totalRevenue||0).toLocaleString()}`}    icon="💰" gradient="bg-gradient-to-br from-green-600 to-green-800" />
-        <KpiCard title="This Week"      value={`₹${(data.thisWeekRevenue||0).toLocaleString()}`} icon="📈" gradient="bg-gradient-to-br from-emerald-500 to-emerald-700"
-          growth={data.revenueGrowth} sub={`vs ₹${(data.lastWeekRevenue||0).toLocaleString()} last week`} />
-        <KpiCard title="Total Orders"   value={data.totalOrders}  icon="📦" gradient="bg-gradient-to-br from-blue-600 to-blue-800" />
-        <KpiCard title="Active Shops"   value={data.totalShops}   icon="🏪" gradient="bg-gradient-to-br from-amber-600 to-amber-800" />
+        <KpiCard title={t('totalRevenue')}  value={`₹${(data.totalRevenue||0).toLocaleString()}`}    icon="💰" gradient="bg-gradient-to-br from-green-600 to-green-800" />
+        <KpiCard title={t('thisWeekRevenue')} value={`₹${(data.thisWeekRevenue||0).toLocaleString()}`} icon="📈" gradient="bg-gradient-to-br from-emerald-500 to-emerald-700"
+          growth={data.revenueGrowth} sub={`vs ₹${(data.lastWeekRevenue||0).toLocaleString()} ${t('vsLastWeek')}`} />
+        <KpiCard title={t('totalOrders')}   value={data.totalOrders}  icon="📦" gradient="bg-gradient-to-br from-blue-600 to-blue-800" />
+        <KpiCard title={t('totalShops')}    value={data.totalShops}   icon="🏪" gradient="bg-gradient-to-br from-amber-600 to-amber-800" />
       </div>
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <KpiCard title="Total Admins"   value={data.totalAdmins}  icon="👨‍💼" gradient="bg-gradient-to-br from-purple-600 to-purple-800" />
-        <KpiCard title="Total Users"    value={data.totalUsers}   icon="👥"   gradient="bg-gradient-to-br from-sky-500 to-sky-700" />
-        <KpiCard title="This Wk Orders" value={data.thisWeekOrders} icon="🛵" gradient="bg-gradient-to-br from-orange-500 to-orange-700" />
-        <KpiCard title="Last Wk Orders" value={data.lastWeekOrders} icon="📊" gradient="bg-gradient-to-br from-slate-500 to-slate-700" />
+        <KpiCard title={t('totalAdmins')}   value={data.totalAdmins}  icon="👨‍💼" gradient="bg-gradient-to-br from-purple-600 to-purple-800" />
+        <KpiCard title={t('totalUsers')}    value={data.totalUsers}   icon="👥"   gradient="bg-gradient-to-br from-sky-500 to-sky-700" />
+        <KpiCard title={t('thisWeek')}      value={data.thisWeekOrders} icon="🛵" gradient="bg-gradient-to-br from-orange-500 to-orange-700" />
+        <KpiCard title={t('lastWeek')}      value={data.lastWeekOrders} icon="📊" gradient="bg-gradient-to-br from-slate-500 to-slate-700" />
       </div>
 
       {/* ── Weather + Charts ── */}
@@ -245,8 +247,8 @@ export default function SADashboard() {
           <div className="card p-5">
             <div className="flex items-center justify-between mb-1">
               <div>
-                <h2 className="font-bold text-gray-800">📊 Platform Revenue — Last 7 Days</h2>
-                <p className="text-xs text-gray-400">All shops combined</p>
+                <h2 className="font-bold text-gray-800">{t('revenueChart')}</h2>
+                <p className="text-xs text-gray-400">{t('shops')}</p>
               </div>
               <GrowthBadge value={data.revenueGrowth} />
             </div>
@@ -254,7 +256,7 @@ export default function SADashboard() {
           </div>
           <div className="card p-5">
             <div className="flex items-center justify-between mb-1">
-              <h2 className="font-bold text-gray-800">📉 6-Month Revenue Trend</h2>
+              <h2 className="font-bold text-gray-800">{t('monthlyTrend')}</h2>
               <p className="font-bold text-green-700 text-sm">₹{(data.totalRevenue||0).toLocaleString()}</p>
             </div>
             <LineChart data={data.monthlyChart || []} color="#15803d" />
@@ -267,9 +269,9 @@ export default function SADashboard() {
 
         {/* Top Shops */}
         <div className="card p-5">
-          <h2 className="font-bold text-gray-800 mb-4">🏆 Top Shops by Revenue</h2>
+          <h2 className="font-bold text-gray-800 mb-4">{t('topShops')}</h2>
           {data.shopPerformance?.length === 0 ? (
-            <p className="text-gray-400 text-sm text-center py-4">No shop data yet</p>
+            <p className="text-gray-400 text-sm text-center py-4">{t('noShopData')}</p>
           ) : (
             <div className="space-y-3">
               {(data.shopPerformance || []).map((s, i) => {
@@ -300,7 +302,7 @@ export default function SADashboard() {
 
         {/* Order Status Funnel */}
         <div className="card p-5">
-          <h2 className="font-bold text-gray-800 mb-4">🔄 Platform Order Status</h2>
+          <h2 className="font-bold text-gray-800 mb-4">{t('platformOrders')}</h2>
           <div className="space-y-2.5">
             {statusList.map((s) => {
               const count = data.statusBreakdown?.[s] || 0;
@@ -326,40 +328,40 @@ export default function SADashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="card p-4 text-center">
           <p className="text-3xl font-black text-green-700">₹{(data.thisWeekRevenue||0).toLocaleString()}</p>
-          <p className="text-sm text-gray-500 mt-1">This Week Revenue</p>
+          <p className="text-sm text-gray-500 mt-1">{t('thisWeekRevenue')}</p>
           <GrowthBadge value={data.revenueGrowth} />
         </div>
         <div className="card p-4 text-center">
           <p className="text-3xl font-black text-blue-700">{data.thisWeekOrders}</p>
-          <p className="text-sm text-gray-500 mt-1">This Week Orders</p>
-          <p className="text-xs text-gray-400 mt-0.5">vs {data.lastWeekOrders} last week</p>
+          <p className="text-sm text-gray-500 mt-1">{t('thisWeek')} {t('orders')}</p>
+          <p className="text-xs text-gray-400 mt-0.5">vs {data.lastWeekOrders} {t('vsLastWeek')}</p>
         </div>
         <div className="card p-4 text-center">
           <p className="text-3xl font-black text-amber-700">
             {data.totalOrders > 0 ? `₹${Math.round((data.totalRevenue || 0) / data.totalOrders)}` : '₹0'}
           </p>
-          <p className="text-sm text-gray-500 mt-1">Avg Order Value</p>
-          <p className="text-xs text-gray-400 mt-0.5">platform average</p>
+          <p className="text-sm text-gray-500 mt-1">{t('avgOrderValue')}</p>
+          <p className="text-xs text-gray-400 mt-0.5">{t('platformAverage')}</p>
         </div>
       </div>
 
       {/* ── Recent Orders ── */}
       <div className="card p-5">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="font-bold text-gray-800">🕐 Recent Platform Orders</h2>
+          <h2 className="font-bold text-gray-800">{t('recentPlatformOrders')}</h2>
         </div>
         {data.recentOrders?.length === 0 ? (
-          <p className="text-gray-400 text-center py-6">No orders yet</p>
+          <p className="text-gray-400 text-center py-6">{t('noOrdersAdmin')}</p>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="text-left text-gray-500 border-b text-xs">
-                  <th className="pb-3 font-semibold">Customer</th>
-                  <th className="pb-3 font-semibold">Shop</th>
-                  <th className="pb-3 font-semibold text-right">Amount</th>
-                  <th className="pb-3 font-semibold">Status</th>
-                  <th className="pb-3 font-semibold">Time</th>
+                  <th className="pb-3 font-semibold">{t('customer')}</th>
+                  <th className="pb-3 font-semibold">{t('shop')}</th>
+                  <th className="pb-3 font-semibold text-right">{t('amount')}</th>
+                  <th className="pb-3 font-semibold">{t('status')}</th>
+                  <th className="pb-3 font-semibold">{t('time')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">

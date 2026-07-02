@@ -3,8 +3,10 @@ import { Link } from 'react-router-dom';
 import API from '../../api/axios';
 import Spinner from '../../components/Spinner';
 import OrderStatusBadge from '../../components/OrderStatusBadge';
+import { useLang } from '../../context/LanguageContext';
 
 export default function MyOrders() {
+  const { t } = useLang();
   const [orders, setOrders]   = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -18,16 +20,16 @@ export default function MyOrders() {
     return (
       <div className="text-center py-24">
         <div className="text-7xl mb-4">📦</div>
-        <h2 className="text-2xl font-bold text-gray-600 mb-3">No orders yet</h2>
-        <p className="text-gray-400 mb-6">Your order history will appear here</p>
-        <Link to="/home" className="btn-primary px-8 py-3 text-base">Order Now</Link>
+        <h2 className="text-2xl font-bold text-gray-600 mb-3">{t('noOrdersYet')}</h2>
+        <p className="text-gray-400 mb-6">{t('noOrdersMsg')}</p>
+        <Link to="/home" className="btn-primary px-8 py-3 text-base">{t('orderNow')}</Link>
       </div>
     );
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">My Orders</h1>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">{t('myOrdersTitle')}</h1>
       <div className="space-y-4">
         {orders.map((o) => (
           <Link to={`/order/${o._id}`} key={o._id} className="card p-5 flex justify-between items-center hover:shadow-lg transition-shadow group">
@@ -37,7 +39,7 @@ export default function MyOrders() {
               </div>
               <div>
                 <h3 className="font-semibold text-gray-800 group-hover:text-primary">{o.shop?.name}</h3>
-                <p className="text-sm text-gray-500">{o.items?.length} item(s) · ₹{o.grandTotal}</p>
+                <p className="text-sm text-gray-500">{o.items?.length} {t('items')} · ₹{o.grandTotal}</p>
                 <p className="text-xs text-gray-400 mt-1">{new Date(o.createdAt).toLocaleString()}</p>
               </div>
             </div>

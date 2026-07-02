@@ -2,13 +2,16 @@ import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { useLang } from '../../context/LanguageContext';
+import LangToggle from '../../components/LangToggle';
 import toast from 'react-hot-toast';
 
 export default function UserLayout() {
   const { user, logout } = useAuth();
   const { totalItems }   = useCart();
+  const { t }            = useLang();
   const navigate = useNavigate();
-  const handleLogout = () => { logout(); toast.success('Logged out'); navigate('/login'); };
+  const handleLogout = () => { logout(); toast.success(t('logout')); navigate('/login'); };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -19,19 +22,18 @@ export default function UserLayout() {
             <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-primary shadow-sm flex-shrink-0">
               <img src="https://www.telugu360.com/wp-content/uploads/2015/08/xxx.jpg" alt="Geetha Online" className="w-full h-full object-cover object-top" />
             </div>
-            <span className="font-bold text-primary text-lg">Geetha Online</span>
+            <span className="font-bold text-primary text-lg">{t('appName')}</span>
           </NavLink>
-          <div className="flex items-center gap-3">
-            {/* Hidden on mobile — shown in bottom nav */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            <LangToggle />
             <NavLink to="/home"
               className={({ isActive }) => `hidden sm:block text-sm font-medium ${isActive ? 'text-primary' : 'text-gray-600 hover:text-primary'}`}>
-              Home
+              {t('home')}
             </NavLink>
             <NavLink to="/my-orders"
               className={({ isActive }) => `hidden sm:block text-sm font-medium ${isActive ? 'text-primary' : 'text-gray-600 hover:text-primary'}`}>
-              My Orders
+              {t('myOrders')}
             </NavLink>
-            {/* Cart icon — always visible */}
             <NavLink to="/cart" className="relative">
               <span className="text-2xl">🛒</span>
               {totalItems > 0 && (
@@ -41,29 +43,26 @@ export default function UserLayout() {
               )}
             </NavLink>
             <span className="hidden sm:block text-sm text-gray-600">👤 {user?.name?.split(' ')[0]}</span>
-            <button onClick={handleLogout} className="hidden sm:block text-sm text-red-500 hover:text-red-700 font-medium">Logout</button>
+            <button onClick={handleLogout} className="hidden sm:block text-sm text-red-500 hover:text-red-700 font-medium">{t('logout')}</button>
           </div>
         </div>
       </nav>
 
-      {/* Page content — add bottom padding on mobile for bottom nav */}
       <main className="max-w-5xl mx-auto px-3 sm:px-4 py-4 sm:py-6 pb-20 sm:pb-6">
         <Outlet />
       </main>
 
-      {/* ── Mobile Bottom Navigation ── */}
+      {/* Mobile Bottom Navigation */}
       <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50 flex">
         <NavLink to="/home" end
           className={({ isActive }) =>
             `flex-1 flex flex-col items-center py-2 gap-0.5 text-xs font-medium transition-colors ${isActive ? 'text-primary' : 'text-gray-500'}`}>
-          <span className="text-xl">🏠</span>
-          Home
+          <span className="text-xl">🏠</span>{t('home')}
         </NavLink>
         <NavLink to="/my-orders"
           className={({ isActive }) =>
             `flex-1 flex flex-col items-center py-2 gap-0.5 text-xs font-medium transition-colors ${isActive ? 'text-primary' : 'text-gray-500'}`}>
-          <span className="text-xl">📦</span>
-          Orders
+          <span className="text-xl">📦</span>{t('myOrders')}
         </NavLink>
         <NavLink to="/cart" className="flex-1 flex flex-col items-center py-2 gap-0.5 text-xs font-medium text-gray-500 relative">
           {({ isActive }) => (
@@ -76,14 +75,13 @@ export default function UserLayout() {
                   </span>
                 )}
               </span>
-              <span className={isActive ? 'text-primary' : ''}>Cart</span>
+              <span className={isActive ? 'text-primary' : ''}>{t('cart')}</span>
             </>
           )}
         </NavLink>
         <button onClick={handleLogout}
           className="flex-1 flex flex-col items-center py-2 gap-0.5 text-xs font-medium text-red-500">
-          <span className="text-xl">🚪</span>
-          Logout
+          <span className="text-xl">🚪</span>{t('logout')}
         </button>
       </nav>
     </div>

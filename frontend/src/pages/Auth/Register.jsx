@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useLang } from '../../context/LanguageContext';
+import LangToggle from '../../components/LangToggle';
 import toast from 'react-hot-toast';
 
 export default function Register() {
+  const { t }        = useLang();
   const { register } = useAuth();
   const navigate     = useNavigate();
   const [form, setForm]         = useState({ name: '', email: '', password: '', phone: '' });
@@ -93,16 +96,19 @@ export default function Register() {
           </div>
 
           <div className="bg-white rounded-3xl shadow-xl p-8 sm:p-10 border border-gray-100">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900">Create Account</h2>
-              <p className="text-gray-500 text-sm mt-1">Fill in your details to get started</p>
+            <div className="mb-8 flex justify-between items-start">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">{t('createAccount')}</h2>
+                <p className="text-gray-500 text-sm mt-1">{t('appName')}</p>
+              </div>
+              <LangToggle />
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
 
               {/* Name */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Full Name</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t('fullName')}</label>
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none">👤</span>
                   <input
@@ -117,7 +123,7 @@ export default function Register() {
 
               {/* Email */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t('emailAddress')}</label>
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none">✉️</span>
                   <input
@@ -133,7 +139,7 @@ export default function Register() {
 
               {/* Phone */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Phone Number</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t('phoneNumber')}</label>
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none">📞</span>
                   <input
@@ -148,7 +154,7 @@ export default function Register() {
 
               {/* Password */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t('password')}</label>
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none">🔑</span>
                   <input
@@ -192,15 +198,15 @@ export default function Register() {
                     </svg>
                     Creating account...
                   </span>
-                ) : 'Create Account →'}
+                ) : `${t('createAccount')} →`}
               </button>
             </form>
 
             <div className="mt-6 pt-6 border-t border-gray-100 text-center">
               <p className="text-sm text-gray-500">
-                Already have an account?{' '}
+                {t('haveAccount')}{' '}
                 <Link to="/login" className="text-green-700 font-semibold hover:text-green-800 hover:underline">
-                  Sign in
+                  {t('login')}
                 </Link>
               </p>
             </div>

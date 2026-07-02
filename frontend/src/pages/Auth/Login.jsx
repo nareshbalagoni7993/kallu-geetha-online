@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useLang } from '../../context/LanguageContext';
+import LangToggle from '../../components/LangToggle';
 import toast from 'react-hot-toast';
 
 export default function Login() {
+  const { t }     = useLang();
   const { login } = useAuth();
   const navigate  = useNavigate();
   const [form, setForm]         = useState({ email: '', password: '' });
@@ -95,16 +98,19 @@ export default function Login() {
           </div>
 
           <div className="bg-white rounded-3xl shadow-xl p-8 sm:p-10 border border-gray-100">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900">Welcome back</h2>
-              <p className="text-gray-500 text-sm mt-1">Sign in to your account</p>
+            <div className="mb-8 flex justify-between items-start">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">{t('appName')}</h2>
+                <p className="text-gray-500 text-sm mt-1">{t('signIn')}</p>
+              </div>
+              <LangToggle />
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
 
               {/* Email */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t('emailAddress')}</label>
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none">✉️</span>
                   <input
@@ -120,7 +126,7 @@ export default function Login() {
 
               {/* Password */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
+                <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t('password')}</label>
                 <div className="relative">
                   <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-lg pointer-events-none">🔑</span>
                   <input
@@ -150,15 +156,15 @@ export default function Login() {
                     </svg>
                     Signing in...
                   </span>
-                ) : 'Sign In →'}
+                ) : `${t('login')} →`}
               </button>
             </form>
 
             <div className="mt-6 pt-6 border-t border-gray-100 text-center">
               <p className="text-sm text-gray-500">
-                New customer?{' '}
+                {t('noAccount')}{' '}
                 <Link to="/register" className="text-green-700 font-semibold hover:text-green-800 hover:underline">
-                  Create free account
+                  {t('createAccount')}
                 </Link>
               </p>
             </div>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import API from '../../api/axios';
 import Spinner from '../../components/Spinner';
 import OrderStatusBadge from '../../components/OrderStatusBadge';
+import { useLang } from '../../context/LanguageContext';
 import toast from 'react-hot-toast';
 
 /* ══════════════════════════════════════════════════
@@ -355,6 +356,7 @@ const timeAgo = (iso) => {
    MAIN DASHBOARD
 ══════════════════════════════════════════════════ */
 export default function AdminDashboard() {
+  const { t }             = useLang();
   const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
   const [testing, setTesting] = useState(false);
@@ -378,9 +380,9 @@ export default function AdminDashboard() {
     return (
       <div className="text-center py-20">
         <div className="text-6xl mb-4">🏪</div>
-        <h2 className="text-2xl font-bold text-gray-700 mb-3">Complete Your Shop Setup</h2>
-        <p className="text-gray-500 mb-6">Add your shop details and go live</p>
-        <Link to="/admin/shop" className="btn-primary text-base px-6 py-3">Setup Shop →</Link>
+        <h2 className="text-2xl font-bold text-gray-700 mb-3">{t('noShopYet')}</h2>
+        <p className="text-gray-500 mb-6">{t('createShopFirst')}</p>
+        <Link to="/admin/shop" className="btn-primary text-base px-6 py-3">{t('createShop')} →</Link>
       </div>
     );
   }
@@ -389,12 +391,12 @@ export default function AdminDashboard() {
   const onlineData = data.paymentBreakdown?.find((p) => p._id !== 'cod');
   const statusList = ['pending','confirmed','preparing','out_for_delivery','delivered','cancelled'];
   const statusCfg  = {
-    pending:          { color: 'bg-yellow-400', label: '⏳ Pending' },
-    confirmed:        { color: 'bg-blue-400',   label: '✅ Confirmed' },
-    preparing:        { color: 'bg-purple-400', label: '🍺 Preparing' },
-    out_for_delivery: { color: 'bg-orange-400', label: '🛵 Out for Delivery' },
-    delivered:        { color: 'bg-green-500',  label: '🎉 Delivered' },
-    cancelled:        { color: 'bg-red-400',    label: '❌ Cancelled' },
+    pending:          { color: 'bg-yellow-400', label: `⏳ ${t('status_pending')}` },
+    confirmed:        { color: 'bg-blue-400',   label: `✅ ${t('status_confirmed')}` },
+    preparing:        { color: 'bg-purple-400', label: `🍺 ${t('status_preparing')}` },
+    out_for_delivery: { color: 'bg-orange-400', label: `🛵 ${t('status_out_for_delivery')}` },
+    delivered:        { color: 'bg-green-500',  label: `🎉 ${t('status_delivered')}` },
+    cancelled:        { color: 'bg-red-400',    label: `❌ ${t('status_cancelled')}` },
   };
 
   return (
@@ -432,11 +434,11 @@ export default function AdminDashboard() {
 
       {/* ── KPI Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <KpiCard title="Total Revenue"  value={`₹${(data.totalRevenue||0).toLocaleString()}`}    icon="💰" gradient="bg-gradient-to-br from-green-600 to-green-800" />
-        <KpiCard title="This Week"      value={`₹${(data.thisWeekRevenue||0).toLocaleString()}`} icon="📈" gradient="bg-gradient-to-br from-amber-600 to-amber-800"
-          growth={data.revenueGrowth} sub={`vs ₹${(data.lastWeekRevenue||0).toLocaleString()} last week`} />
-        <KpiCard title="Total Orders"   value={data.totalOrders}   icon="📦" gradient="bg-gradient-to-br from-blue-600 to-blue-800" />
-        <KpiCard title="Pending Orders" value={data.pendingOrders} icon="⏳" gradient="bg-gradient-to-br from-orange-500 to-orange-700" growth={data.ordersGrowth} />
+        <KpiCard title={t('totalRevenue')}  value={`₹${(data.totalRevenue||0).toLocaleString()}`}    icon="💰" gradient="bg-gradient-to-br from-green-600 to-green-800" />
+        <KpiCard title={t('thisWeekRevenue')} value={`₹${(data.thisWeekRevenue||0).toLocaleString()}`} icon="📈" gradient="bg-gradient-to-br from-amber-600 to-amber-800"
+          growth={data.revenueGrowth} sub={`vs ₹${(data.lastWeekRevenue||0).toLocaleString()} ${t('vsLastWeek')}`} />
+        <KpiCard title={t('totalOrders')}   value={data.totalOrders}   icon="📦" gradient="bg-gradient-to-br from-blue-600 to-blue-800" />
+        <KpiCard title={t('pendingOrders')} value={data.pendingOrders} icon="⏳" gradient="bg-gradient-to-br from-orange-500 to-orange-700" growth={data.ordersGrowth} />
       </div>
 
       {/* ── Weather + Charts ── */}
@@ -456,8 +458,8 @@ export default function AdminDashboard() {
           <div className="card p-5">
             <div className="flex items-center justify-between mb-1">
               <div>
-                <h2 className="font-bold text-gray-800">📊 Last 7 Days Revenue</h2>
-                <p className="text-xs text-gray-400">Daily sales breakdown</p>
+                <h2 className="font-bold text-gray-800">{t('revenueChart')}</h2>
+                <p className="text-xs text-gray-400">{t('revenue')}</p>
               </div>
               <div className="text-right">
                 <p className="font-bold text-green-700">₹{(data.thisWeekRevenue||0).toLocaleString()}</p>
@@ -471,8 +473,8 @@ export default function AdminDashboard() {
           <div className="card p-5">
             <div className="flex items-center justify-between mb-1">
               <div>
-                <h2 className="font-bold text-gray-800">📉 6-Month Revenue Trend</h2>
-                <p className="text-xs text-gray-400">Monthly performance overview</p>
+                <h2 className="font-bold text-gray-800">{t('monthlyTrend')}</h2>
+                <p className="text-xs text-gray-400">{t('revenue')}</p>
               </div>
               <div className="text-right">
                 <p className="font-bold text-amber-700">₹{(data.totalRevenue||0).toLocaleString()}</p>
@@ -489,11 +491,11 @@ export default function AdminDashboard() {
 
         {/* Week vs Week */}
         <div className="card p-5">
-          <h2 className="font-bold text-gray-800 mb-4">📅 Week-over-Week</h2>
+          <h2 className="font-bold text-gray-800 mb-4">{t('weekComparison')}</h2>
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 bg-green-50 rounded-xl">
               <div>
-                <p className="text-xs text-gray-500 font-medium">This Week</p>
+                <p className="text-xs text-gray-500 font-medium">{t('thisWeek')}</p>
                 <p className="text-2xl font-bold text-green-700">₹{(data.thisWeekRevenue||0).toLocaleString()}</p>
                 <p className="text-xs text-gray-400">{data.thisWeekOrders} orders</p>
               </div>
@@ -501,7 +503,7 @@ export default function AdminDashboard() {
             </div>
             <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
               <div>
-                <p className="text-xs text-gray-500 font-medium">Last Week</p>
+                <p className="text-xs text-gray-500 font-medium">{t('lastWeek')}</p>
                 <p className="text-2xl font-bold text-gray-500">₹{(data.lastWeekRevenue||0).toLocaleString()}</p>
                 <p className="text-xs text-gray-400">{data.lastWeekOrders} orders</p>
               </div>
@@ -521,7 +523,7 @@ export default function AdminDashboard() {
 
         {/* Order Funnel */}
         <div className="card p-5">
-          <h2 className="font-bold text-gray-800 mb-4">🔄 Order Status Breakdown</h2>
+          <h2 className="font-bold text-gray-800 mb-4">{t('orderFunnel')}</h2>
           <div className="space-y-2.5">
             {statusList.map((s) => {
               const count = data.statusBreakdown?.[s] || 0;
@@ -546,21 +548,21 @@ export default function AdminDashboard() {
       {/* ── Stock Overview ── */}
       <div className="card p-5">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="font-bold text-gray-800">📦 Stock Overview</h2>
-          <Link to="/admin/products" className="text-primary text-sm hover:underline font-medium">Manage →</Link>
+          <h2 className="font-bold text-gray-800">{t('stockSummary')}</h2>
+          <Link to="/admin/products" className="text-primary text-sm hover:underline font-medium">{t('manageProducts')} →</Link>
         </div>
         <div className="grid grid-cols-3 gap-3 mb-4">
           <div className="bg-green-50 rounded-xl p-3 text-center">
             <p className="text-2xl font-bold text-green-700">{data.totalStockQty || 0}</p>
-            <p className="text-xs text-green-600 mt-0.5">Total Units</p>
+            <p className="text-xs text-green-600 mt-0.5">{t('inStock')}</p>
           </div>
           <div className="bg-amber-50 rounded-xl p-3 text-center">
             <p className="text-lg font-bold text-amber-700">₹{(data.totalStockValue||0).toLocaleString()}</p>
-            <p className="text-xs text-amber-600 mt-0.5">Stock Value</p>
+            <p className="text-xs text-amber-600 mt-0.5">{t('stockQty')}</p>
           </div>
           <div className="bg-red-50 rounded-xl p-3 text-center">
             <p className="text-2xl font-bold text-red-600">{data.outOfStockCount || 0}</p>
-            <p className="text-xs text-red-500 mt-0.5">Out of Stock</p>
+            <p className="text-xs text-red-500 mt-0.5">{t('outOfStock')}</p>
           </div>
         </div>
         {data.lowStockProducts?.length > 0 && (
@@ -608,11 +610,11 @@ export default function AdminDashboard() {
       {/* ── Recent Orders ── */}
       <div className="card p-5">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="font-bold text-gray-800">🕐 Recent Orders</h2>
-          <Link to="/admin/orders" className="text-primary text-sm hover:underline font-medium">View all →</Link>
+          <h2 className="font-bold text-gray-800">{t('recentOrders')}</h2>
+          <Link to="/admin/orders" className="text-primary text-sm hover:underline font-medium">{t('view')} →</Link>
         </div>
         {data.recentOrders?.length === 0 ? (
-          <p className="text-gray-400 text-center py-8">No orders yet</p>
+          <p className="text-gray-400 text-center py-8">{t('noOrdersAdmin')}</p>
         ) : (
           <div className="space-y-2">
             {data.recentOrders.map((o) => (

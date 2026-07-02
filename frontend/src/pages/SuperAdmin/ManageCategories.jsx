@@ -1,17 +1,21 @@
 import { useEffect, useState } from 'react';
 import API from '../../api/axios';
 import Spinner from '../../components/Spinner';
+import ConfirmModal from '../../components/ConfirmModal';
+import { useLang } from '../../context/LanguageContext';
 import toast from 'react-hot-toast';
 
 const ICON_OPTIONS = ['🏪', '🍺', '🌴', '🍎', '🧊', '🥃', '🫙', '🍶', '🛒', '🌾', '🥤', '🍵'];
 
 export default function ManageCategories() {
+  const { t }                       = useLang();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading]       = useState(true);
   const [label, setLabel]           = useState('');
   const [icon, setIcon]             = useState('🏪');
   const [adding, setAdding]         = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
 
   const fetchCategories = () => {
     setLoading(true);
@@ -34,12 +38,13 @@ export default function ManageCategories() {
     } finally { setAdding(false); }
   };
 
-  const handleDelete = async (id, lbl) => {
-    if (!window.confirm(`Delete "${lbl}"? Existing shops using this category won't be affected.`)) return;
-    setDeletingId(id);
+  const handleDelete = async () => {
+    if (!confirmDelete) return;
+    setDeletingId(confirmDelete.id);
     try {
-      await API.delete(`/superadmin/category/${id}`);
+      await API.delete(`/superadmin/category/${confirmDelete.id}`);
       toast.success('Category removed');
+      setConfirmDelete(null);
       fetchCategories();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to delete');
@@ -50,7 +55,7 @@ export default function ManageCategories() {
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-gray-800 mb-1">Manage Shop Categories</h1>
+      <h1 className="text-2xl font-bold text-gray-800 mb-1">{t('manageCategories')}</h1>
       <p className="text-gray-500 text-sm mb-6">Add or remove categories used for shops across the platform.</p>
 
       {/* Add Form */}
@@ -116,11 +121,11 @@ export default function ManageCategories() {
                   <p className="text-xs text-gray-400 font-mono">{cat.value}</p>
                 </div>
                 <button
-                  onClick={() => handleDelete(cat._id, cat.label)}
+                  onClick={() => setConfirmDelete({ id: cat._id, label: cat.label })}
                   disabled={deletingId === cat._id}
                   className="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 transition-colors disabled:opacity-50"
                 >
-                  {deletingId === cat._id ? '...' : 'Remove'}
+                  {deletingId === cat._id ? '...' : t('delete')}
                 </button>
               </li>
             ))}
@@ -131,6 +136,18 @@ export default function ManageCategories() {
       <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-700">
         💡 Removing a category does not affect existing shops — they keep their current category label.
       </div>
+
+      {confirmDelete && (
+        <ConfirmModal
+          title={t('deleteProduct')}
+          message={`${t('delete')} "${confirmDelete.label}"?`}
+          confirmLabel={t('delete')}
+          confirmColor="red"
+          loading={!!deletingId}
+          onConfirm={handleDelete}
+          onCancel={() => setConfirmDelete(null)}
+        />
+      )}
     </div>
   );
 }

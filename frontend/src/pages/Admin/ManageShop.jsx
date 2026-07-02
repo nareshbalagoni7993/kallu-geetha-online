@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import API from '../../api/axios';
 import Spinner from '../../components/Spinner';
+import { useLang } from '../../context/LanguageContext';
 import toast from 'react-hot-toast';
 
 const CATEGORIES = [
@@ -18,6 +19,7 @@ const empty = {
 };
 
 export default function ManageShop() {
+  const { t } = useLang();
   const [shop, setShop]         = useState(null);
   const [loading, setLoading]   = useState(true);
   const [form, setForm]         = useState(empty);
@@ -71,7 +73,6 @@ export default function ManageShop() {
       fd.append('deliveryTime',   form.deliveryTime);
       fd.append('deliveryCharge', form.deliveryCharge);
       fd.append('minOrder',       form.minOrder);
-      // nested address — backend should handle flat or nested; send as JSON string fallback
       fd.append('address', JSON.stringify({
         street: form['address.street'],
         city:   form['address.city'],
@@ -109,15 +110,15 @@ export default function ManageShop() {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">{shop ? 'Update My Shop' : 'Create My Shop'}</h1>
+          <h1 className="text-2xl font-bold text-gray-800">{shop ? t('updateMyShop') : t('createMyShop')}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            {shop ? 'Edit shop details, upload banner & location' : 'Set up your shop to start receiving orders'}
+            {shop ? t('editShopDetails') : t('setupShop')}
           </p>
         </div>
         {shop && (
           <button onClick={toggleOpen} disabled={toggling}
             className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${shop.isOpen ? 'bg-red-100 text-red-600 hover:bg-red-200 border border-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200 border border-green-200'}`}>
-            {toggling ? '...' : shop.isOpen ? '🔴 Close Shop' : '🟢 Open Shop'}
+            {toggling ? '...' : shop.isOpen ? t('closeShop') : t('openShop')}
           </button>
         )}
       </div>
@@ -127,7 +128,7 @@ export default function ManageShop() {
 
           {/* ── SHOP BANNER UPLOAD ── */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">🖼️ Shop Banner / Cover Image</h3>
+            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">🖼️ {t('shopBannerSection')}</h3>
             <div className="relative w-full h-48 rounded-2xl overflow-hidden bg-gradient-to-br from-green-700 to-amber-700 border-2 border-dashed border-gray-300 cursor-pointer hover:border-primary transition-colors group"
               onClick={() => fileRef.current.click()}>
               {bannerPreview ? (
@@ -167,26 +168,26 @@ export default function ManageShop() {
 
           {/* ── BASIC INFO ── */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">📋 Shop Info</h3>
+            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">📋 {t('shopInfoSection')}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Shop Name *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('shopName')} *</label>
                 <input name="name" className="input-field" placeholder="e.g. Geetha Toddy Shop"
                   value={form.name} onChange={handleChange} required />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('shopCategory')}</label>
                 <select name="category" className="input-field" value={form.category} onChange={handleChange}>
                   {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Shop Phone</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('shopPhone')}</label>
                 <input name="phone" className="input-field" placeholder="Contact number for customers"
                   value={form.phone} onChange={handleChange} />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('description')}</label>
                 <textarea name="description" rows={2} className="input-field resize-none"
                   placeholder="Describe your shop, specialty products, etc." value={form.description} onChange={handleChange} />
               </div>
@@ -197,7 +198,7 @@ export default function ManageShop() {
 
           {/* ── LOCATION ── */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-1">📍 Location</h3>
+            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-1">📍 {t('location')}</h3>
             <p className="text-xs text-gray-400 mb-3">
               Latitude & Longitude are used to sort shops by distance for customers.
               Find your coordinates on <a href="https://maps.google.com" target="_blank" rel="noopener noreferrer" className="text-primary underline">Google Maps</a> (right-click your location → "What's here?")
@@ -232,21 +233,21 @@ export default function ManageShop() {
 
           {/* ── DELIVERY ── */}
           <div>
-            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">🚚 Delivery Settings</h3>
+            <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">🚚 {t('deliverySettings')}</h3>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Time (min)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('deliveryTimeLbl')}</label>
                 <input name="deliveryTime" type="number" min="5" className="input-field"
                   value={form.deliveryTime} onChange={handleChange} />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Delivery Charge (₹)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('deliveryChargeLbl')}</label>
                 <input name="deliveryCharge" type="number" min="0" className="input-field"
                   value={form.deliveryCharge} onChange={handleChange} />
                 <p className="text-xs text-gray-400 mt-1">Set 0 for free delivery</p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Min Order (₹)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{t('minOrderLbl')}</label>
                 <input name="minOrder" type="number" min="0" className="input-field"
                   value={form.minOrder} onChange={handleChange} />
               </div>
@@ -257,7 +258,7 @@ export default function ManageShop() {
           <div className="pt-2 flex items-center gap-4">
             <button type="submit" disabled={saving}
               className="btn-primary px-10 py-3 text-base disabled:opacity-60">
-              {saving ? '⏳ Saving...' : shop ? '✓ Update Shop' : '✓ Create Shop'}
+              {saving ? `⏳ ${t('saving')}` : shop ? t('updateShopBtn') : t('createShopBtn')}
             </button>
             {bannerFile && (
               <span className="text-sm text-amber-600 font-medium">
@@ -271,7 +272,7 @@ export default function ManageShop() {
       {/* Preview */}
       {shop && (
         <div className="mt-6 card p-5">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">👁 How customers see your shop</h3>
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">👁 {t('shopPreview')}</h3>
           <div className="flex gap-4 items-start p-4 bg-gray-50 rounded-xl border">
             <div className="w-28 h-20 rounded-xl overflow-hidden bg-gradient-to-br from-green-700 to-amber-700 flex items-center justify-center flex-shrink-0">
               {shop.image
@@ -285,11 +286,11 @@ export default function ManageShop() {
                 <span>⭐ {shop.rating?.toFixed(1)}</span>
                 <span>🕒 {shop.deliveryTime} min</span>
                 <span className={shop.deliveryCharge === 0 ? 'text-green-600 font-medium' : ''}>
-                  {shop.deliveryCharge === 0 ? '🚚 Free delivery' : `🚚 ₹${shop.deliveryCharge}`}
+                  {shop.deliveryCharge === 0 ? t('freeDelivery') : `🚚 ₹${shop.deliveryCharge}`}
                 </span>
               </div>
               <span className={`mt-1.5 inline-block text-xs px-2 py-0.5 rounded-full font-semibold ${shop.isOpen ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
-                {shop.isOpen ? '● Open' : '● Closed'}
+                {shop.isOpen ? t('openStatus') : t('closedStatus')}
               </span>
             </div>
           </div>

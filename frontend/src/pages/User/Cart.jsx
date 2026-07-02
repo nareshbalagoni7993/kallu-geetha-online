@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import API from '../../api/axios';
 import toast from 'react-hot-toast';
 import TestPaymentModal from '../../components/TestPaymentModal';
+import { useLang } from '../../context/LanguageContext';
 
 const PAYMENT_OPTIONS = [
   { value: 'cod',     label: 'Cash on Delivery', desc: 'Pay when order arrives',                     icon: '💵', color: 'amber' },
@@ -19,6 +20,7 @@ const ACCENT = {
 };
 
 export default function Cart() {
+  const { t }      = useLang();
   const { cart, shopInfo, totalAmount, addToCart, removeFromCart, deleteFromCart, clearCart } = useCart();
   const { user }   = useAuth();
   const navigate   = useNavigate();
@@ -107,9 +109,9 @@ export default function Cart() {
     return (
       <div className="text-center py-24">
         <div className="text-7xl mb-4">🛒</div>
-        <h2 className="text-2xl font-bold text-gray-600 mb-3">Your cart is empty</h2>
-        <p className="text-gray-400 mb-6">Browse shops and add toddy products to your cart</p>
-        <button onClick={() => navigate('/home')} className="btn-primary px-8 py-3 text-base">Browse Shops</button>
+        <h2 className="text-2xl font-bold text-gray-600 mb-3">{t('cartEmpty')}</h2>
+        <p className="text-gray-400 mb-6">{t('cartEmptyMsg')}</p>
+        <button onClick={() => navigate('/home')} className="btn-primary px-8 py-3 text-base">{t('browseShops')}</button>
       </div>
     );
   }
@@ -131,7 +133,7 @@ export default function Cart() {
       )}
 
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-800 mb-1">Your Cart</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-1">{t('myCart')}</h1>
         {shopInfo && <p className="text-gray-500 text-sm mb-5">🏪 {shopInfo.name}</p>}
 
         {/* ── Items ── */}
@@ -154,15 +156,15 @@ export default function Cart() {
 
         {/* ── Bill ── */}
         <div className="card p-5 mb-4">
-          <h2 className="font-semibold text-gray-800 mb-3">Bill Summary</h2>
+          <h2 className="font-semibold text-gray-800 mb-3">{t('subtotal')}</h2>
           <div className="space-y-2 text-sm text-gray-600">
-            <div className="flex justify-between"><span>Item total</span><span>₹{totalAmount}</span></div>
+            <div className="flex justify-between"><span>{t('subtotal')}</span><span>₹{totalAmount}</span></div>
             <div className="flex justify-between">
-              <span>Delivery charge</span>
-              <span>{deliveryCharge === 0 ? <span className="text-green-600 font-medium">FREE</span> : `₹${deliveryCharge}`}</span>
+              <span>{t('deliveryCharge')}</span>
+              <span>{deliveryCharge === 0 ? <span className="text-green-600 font-medium">{t('free')}</span> : `₹${deliveryCharge}`}</span>
             </div>
             <div className="border-t pt-2 flex justify-between font-bold text-gray-800 text-base">
-              <span>Grand Total</span><span className="text-primary">₹{grandTotal}</span>
+              <span>{t('grandTotal')}</span><span className="text-primary">₹{grandTotal}</span>
             </div>
           </div>
         </div>
@@ -170,21 +172,21 @@ export default function Cart() {
         {/* ── Delivery Address ── */}
         <div className="card p-5 mb-4">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold text-gray-800">📍 Delivery Address</h2>
+            <h2 className="font-semibold text-gray-800">{t('deliveryAddressLabel')}</h2>
             <button
               onClick={detectLocation}
               disabled={locLoading}
               className="flex items-center gap-1.5 text-xs font-semibold text-white bg-green-600 hover:bg-green-700 disabled:opacity-60 px-3 py-1.5 rounded-lg transition-colors">
               {locLoading
-                ? <><span className="animate-spin">⏳</span> Detecting...</>
-                : <>📍 Use My Location</>}
+                ? <><span className="animate-spin">⏳</span> {t('detecting')}</>
+                : <>{t('useMyLocation')}</>}
             </button>
           </div>
 
           <div className="space-y-3">
-            <input className="input-field" placeholder="Street / Area / Landmark"
+            <input className="input-field" placeholder={t('streetHouseNo')}
               value={address.street} onChange={(e) => setAddress({ ...address, street: e.target.value })} />
-            <input className="input-field" placeholder="City / Town *"
+            <input className="input-field" placeholder={t('cityTown')}
               value={address.city}   onChange={(e) => setAddress({ ...address, city: e.target.value })} required />
           </div>
 
@@ -212,7 +214,7 @@ export default function Cart() {
 
         {/* ── Payment Method ── */}
         <div className="card p-5 mb-6">
-          <h2 className="font-semibold text-gray-800 mb-4">💳 Payment Method</h2>
+          <h2 className="font-semibold text-gray-800 mb-4">{t('paymentMethod')}</h2>
           <div className="space-y-3">
             {PAYMENT_OPTIONS.map((p) => {
               const ac  = ACCENT[p.color];
@@ -272,10 +274,10 @@ export default function Cart() {
                 <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="3" className="opacity-25" />
                 <path fill="white" className="opacity-75" d="M4 12a8 8 0 018-8v8H4z" />
               </svg>
-              {paymentMethod === 'cod' ? 'Placing Order…' : 'Preparing Payment…'}
+              {t('placing')}
             </span>
           ) : (
-            `Place Order · ₹${grandTotal}`
+            `${t('placeOrder')} · ₹${grandTotal}`
           )}
         </button>
       </div>

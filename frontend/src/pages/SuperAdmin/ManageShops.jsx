@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import API from '../../api/axios';
 import Spinner from '../../components/Spinner';
 import ConfirmModal from '../../components/ConfirmModal';
+import { useLang } from '../../context/LanguageContext';
 import toast from 'react-hot-toast';
 
 const STATUS_COLORS = {
@@ -18,6 +19,7 @@ function ShopDrawer({ shopId, onClose, catMap, onShopUpdated, onShopDeleted }) {
   const [saving, setSaving]     = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const { t } = useLang();
 
   useEffect(() => {
     setLoading(true);
@@ -76,7 +78,7 @@ function ShopDrawer({ shopId, onClose, catMap, onShopUpdated, onShopDeleted }) {
                     />
                     <button onClick={handleSaveName} disabled={saving}
                       className="text-xs bg-white/20 hover:bg-white/30 px-2 py-1 rounded-lg font-semibold transition-colors">
-                      {saving ? '...' : '✓ Save'}
+                      {saving ? '...' : t('saveNameBtn')}
                     </button>
                     <button onClick={() => setEditing(false)} className="text-white/60 hover:text-white text-sm">✕</button>
                   </div>
@@ -86,7 +88,7 @@ function ShopDrawer({ shopId, onClose, catMap, onShopUpdated, onShopDeleted }) {
                     {!loading && (
                       <button onClick={() => setEditing(true)}
                         className="text-white/60 hover:text-white text-xs bg-white/10 hover:bg-white/20 px-1.5 py-0.5 rounded transition-colors">
-                        ✏️ Edit
+                        ✏️ {t('edit')}
                       </button>
                     )}
                   </div>
@@ -107,10 +109,10 @@ function ShopDrawer({ shopId, onClose, catMap, onShopUpdated, onShopDeleted }) {
           {data && (
             <div className="flex gap-2">
               <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${data.shop?.isActive ? 'bg-green-500/30 text-green-100' : 'bg-red-500/30 text-red-100'}`}>
-                {data.shop?.isActive ? '✅ Active' : '❌ Inactive'}
+                {data.shop?.isActive ? `✅ ${t('active')}` : `❌ ${t('inactive')}`}
               </span>
               <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${data.shop?.isOpen ? 'bg-white/20 text-white' : 'bg-white/10 text-white/50'}`}>
-                {data.shop?.isOpen ? '🟢 Open' : '🔴 Closed'}
+                {data.shop?.isOpen ? `🟢 ${t('openLabel')}` : `🔴 ${t('closedLabel')}`}
               </span>
             </div>
           )}
@@ -122,10 +124,10 @@ function ShopDrawer({ shopId, onClose, catMap, onShopUpdated, onShopDeleted }) {
               {/* Stats row */}
               <div className="grid grid-cols-4 gap-2">
                 {[
-                  { label: 'Orders',   val: data.totalOrders,                            bg: 'bg-blue-50',    text: 'text-blue-700' },
-                  { label: 'Revenue',  val: `₹${(data.totalRevenue||0).toLocaleString()}`,bg: 'bg-green-50',   text: 'text-green-700' },
-                  { label: 'Pending',  val: data.pendingOrders,                           bg: 'bg-yellow-50',  text: 'text-yellow-700' },
-                  { label: 'Done',     val: data.deliveredOrders,                         bg: 'bg-emerald-50', text: 'text-emerald-700' },
+                  { label: t('orders'),        val: data.totalOrders,                             bg: 'bg-blue-50',    text: 'text-blue-700' },
+                  { label: t('revenue'),        val: `₹${(data.totalRevenue||0).toLocaleString()}`, bg: 'bg-green-50',  text: 'text-green-700' },
+                  { label: t('status_pending'), val: data.pendingOrders,                           bg: 'bg-yellow-50',  text: 'text-yellow-700' },
+                  { label: t('done'),           val: data.deliveredOrders,                         bg: 'bg-emerald-50', text: 'text-emerald-700' },
                 ].map((s) => (
                   <div key={s.label} className={`${s.bg} rounded-xl p-2.5 text-center`}>
                     <p className={`text-lg font-black ${s.text}`}>{s.val}</p>
@@ -136,7 +138,7 @@ function ShopDrawer({ shopId, onClose, catMap, onShopUpdated, onShopDeleted }) {
 
               {/* Owner */}
               <div className="card p-4">
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">👤 Owner Details</h3>
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">👤 {t('ownerDetails')}</h3>
                 <div className="flex items-center gap-3">
                   <div className="w-11 h-11 rounded-xl bg-amber-100 flex items-center justify-center font-bold text-amber-700 text-lg flex-shrink-0">
                     {data.shop.owner?.name?.charAt(0)?.toUpperCase()}
@@ -155,7 +157,7 @@ function ShopDrawer({ shopId, onClose, catMap, onShopUpdated, onShopDeleted }) {
 
               {/* Address */}
               <div className="card p-4">
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">📍 Shop Address</h3>
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">📍 {t('shopAddress')}</h3>
                 <div className="grid grid-cols-2 gap-2">
                   {[
                     { label: 'State',    val: data.shop.address?.state || 'Telangana' },
@@ -175,20 +177,20 @@ function ShopDrawer({ shopId, onClose, catMap, onShopUpdated, onShopDeleted }) {
 
               {/* Payment */}
               <div className="card p-4">
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">💳 Payment Breakdown</h3>
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">💳 {t('paymentBreakdown')}</h3>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center p-2.5 bg-amber-50 rounded-xl">
-                    <span className="text-sm font-medium text-gray-700">💵 Cash on Delivery</span>
+                    <span className="text-sm font-medium text-gray-700">💵 {t('cashOnDelivery')}</span>
                     <div className="text-right">
                       <p className="font-bold text-amber-700">₹{(codData?.total||0).toLocaleString()}</p>
-                      <p className="text-xs text-gray-400">{codData?.count||0} orders</p>
+                      <p className="text-xs text-gray-400">{codData?.count||0} {t('orders').toLowerCase()}</p>
                     </div>
                   </div>
                   <div className="flex justify-between items-center p-2.5 bg-blue-50 rounded-xl">
-                    <span className="text-sm font-medium text-gray-700">💳 Online Payment</span>
+                    <span className="text-sm font-medium text-gray-700">💳 {t('onlinePayment')}</span>
                     <div className="text-right">
                       <p className="font-bold text-blue-700">₹{(onlineData?.total||0).toLocaleString()}</p>
-                      <p className="text-xs text-gray-400">{onlineData?.count||0} orders</p>
+                      <p className="text-xs text-gray-400">{onlineData?.count||0} {t('orders').toLowerCase()}</p>
                     </div>
                   </div>
                 </div>
@@ -196,19 +198,19 @@ function ShopDrawer({ shopId, onClose, catMap, onShopUpdated, onShopDeleted }) {
 
               {/* Stock */}
               <div className="card p-4">
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">📦 Stock Summary</h3>
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">📦 {t('stockSummary')}</h3>
                 <div className="grid grid-cols-3 gap-2 mb-3">
                   <div className="bg-gray-50 rounded-lg p-2 text-center">
                     <p className="text-lg font-bold text-gray-800">{data.products?.length||0}</p>
-                    <p className="text-[10px] text-gray-400">Products</p>
+                    <p className="text-[10px] text-gray-400">{t('products')}</p>
                   </div>
                   <div className="bg-amber-50 rounded-lg p-2 text-center">
                     <p className="text-lg font-bold text-amber-700">{data.totalStockQty}</p>
-                    <p className="text-[10px] text-amber-500">Units</p>
+                    <p className="text-[10px] text-amber-500">{t('units')}</p>
                   </div>
                   <div className="bg-red-50 rounded-lg p-2 text-center">
                     <p className="text-lg font-bold text-red-600">{data.outOfStock}</p>
-                    <p className="text-[10px] text-red-400">Out of Stock</p>
+                    <p className="text-[10px] text-red-400">{t('outOfStock')}</p>
                   </div>
                 </div>
                 {data.products?.length > 0 && (
@@ -234,7 +236,7 @@ function ShopDrawer({ shopId, onClose, catMap, onShopUpdated, onShopDeleted }) {
                       </tbody>
                     </table>
                     <div className="flex justify-between mt-2 pt-2 border-t text-xs font-bold">
-                      <span className="text-gray-600">Total Stock Value</span>
+                      <span className="text-gray-600">{t('totalStockValue')}</span>
                       <span className="text-green-700">₹{(data.totalStockValue||0).toLocaleString()}</span>
                     </div>
                   </div>
@@ -244,7 +246,7 @@ function ShopDrawer({ shopId, onClose, catMap, onShopUpdated, onShopDeleted }) {
               {/* Recent Orders */}
               {data.recentOrders?.length > 0 && (
                 <div className="card p-4">
-                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">🕒 Recent Orders</h3>
+                  <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">🕒 {t('recentOrders')}</h3>
                   <div className="space-y-2">
                     {data.recentOrders.map((o) => (
                       <div key={o._id} className="flex items-center justify-between p-2.5 bg-gray-50 rounded-xl">
@@ -266,12 +268,12 @@ function ShopDrawer({ shopId, onClose, catMap, onShopUpdated, onShopDeleted }) {
 
               {/* Danger Zone */}
               <div className="card p-4 border border-red-100">
-                <h3 className="text-xs font-bold text-red-400 uppercase tracking-wide mb-3">⚠️ Danger Zone</h3>
+                <h3 className="text-xs font-bold text-red-400 uppercase tracking-wide mb-3">{t('dangerZone')}</h3>
                 <button onClick={() => setConfirmDelete(true)}
                   className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors">
-                  🗑️ Delete This Shop
+                  {t('deleteShop')}
                 </button>
-                <p className="text-[10px] text-gray-400 text-center mt-2">This will permanently remove the shop. Orders are NOT deleted.</p>
+                <p className="text-[10px] text-gray-400 text-center mt-2">{t('deleteShopMsg')}</p>
               </div>
             </>
           )}
@@ -280,9 +282,9 @@ function ShopDrawer({ shopId, onClose, catMap, onShopUpdated, onShopDeleted }) {
 
       {confirmDelete && (
         <ConfirmModal
-          title="Delete Shop?"
-          message={`Permanently delete "${data?.shop?.name}"? All shop data will be removed. This cannot be undone.`}
-          confirmLabel="Yes, Delete Shop"
+          title={t('deleteShopTitle')}
+          message={`"${data?.shop?.name}"? ${t('deleteShopMsg')}`}
+          confirmLabel={t('confirmDeleteShop')}
           confirmColor="red"
           loading={deleting}
           onConfirm={handleDelete}
@@ -304,6 +306,7 @@ export default function SAManageShops() {
   const [loading, setLoading]     = useState(true);
   const [drawerShopId, setDrawerShopId] = useState(null);
   const [search, setSearch]       = useState('');
+  const { t } = useLang();
 
   const fetchShops = () => {
     setLoading(true);
@@ -344,12 +347,12 @@ export default function SAManageShops() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Manage Shops</h1>
-          <p className="text-sm text-gray-400 mt-0.5">Click any shop to view details, edit name, or delete</p>
+          <h1 className="text-2xl font-bold text-gray-800">{t('manageShops')}</h1>
+          <p className="text-sm text-gray-400 mt-0.5">{t('manageShopsSubtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm font-bold text-green-700 bg-green-50 border border-green-200 px-3 py-1.5 rounded-xl">
-            {shops.length} shops
+            {shops.length} {t('shops').toLowerCase()}
           </span>
         </div>
       </div>
@@ -373,7 +376,7 @@ export default function SAManageShops() {
 
       {search && (
         <p className="text-sm text-gray-500 mb-3">
-          Showing {filtered.length} of {shops.length} shops
+          Showing {filtered.length} of {shops.length} {t('shops').toLowerCase()}
           {filtered.length === 0 && <span className="text-red-500"> — no results</span>}
         </p>
       )}
@@ -384,18 +387,18 @@ export default function SAManageShops() {
           <table className="w-full text-sm min-w-[640px]">
             <thead>
               <tr style={{ background: 'linear-gradient(135deg,#f0fdf4,#dcfce7)' }} className="border-b">
-                <th className="text-left p-4 font-semibold text-gray-600">Shop</th>
-                <th className="text-left p-4 font-semibold text-gray-600">Owner</th>
-                <th className="text-left p-4 font-semibold text-gray-600">Category</th>
-                <th className="text-left p-4 font-semibold text-gray-600">Location</th>
-                <th className="text-left p-4 font-semibold text-gray-600">Status</th>
-                <th className="text-left p-4 font-semibold text-gray-600">Action</th>
+                <th className="text-left p-4 font-semibold text-gray-600">{t('shop')}</th>
+                <th className="text-left p-4 font-semibold text-gray-600">{t('owner')}</th>
+                <th className="text-left p-4 font-semibold text-gray-600">{t('category')}</th>
+                <th className="text-left p-4 font-semibold text-gray-600">{t('location')}</th>
+                <th className="text-left p-4 font-semibold text-gray-600">{t('status')}</th>
+                <th className="text-left p-4 font-semibold text-gray-600">{t('action')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filtered.length === 0 ? (
                 <tr><td colSpan={6} className="text-center py-12 text-gray-400">
-                  {search ? `No shops matching "${search}"` : 'No shops yet'}
+                  {search ? `No shops matching "${search}"` : t('noShops')}
                 </td></tr>
               ) : filtered.map((s) => {
                 const loc = [s.address?.mandal, s.address?.district || s.address?.city].filter(Boolean).join(', ') || '—';
@@ -415,17 +418,17 @@ export default function SAManageShops() {
                     <td className="p-4">
                       <div className="flex flex-col gap-1">
                         <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full w-fit ${s.isActive ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'}`}>
-                          {s.isActive ? '● Active' : '● Inactive'}
+                          {s.isActive ? `● ${t('active')}` : `● ${t('inactive')}`}
                         </span>
                         <span className={`text-[10px] font-medium ${s.isOpen ? 'text-green-500' : 'text-gray-400'}`}>
-                          {s.isOpen ? '🟢 Open' : '🔴 Closed'}
+                          {s.isOpen ? `🟢 ${t('openLabel')}` : `🔴 ${t('closedLabel')}`}
                         </span>
                       </div>
                     </td>
                     <td className="p-4" onClick={(e) => e.stopPropagation()}>
                       <button onClick={(e) => handleToggle(s._id, e)}
                         className={`text-xs px-3 py-1.5 rounded-full font-semibold transition-colors ${s.isActive ? 'bg-red-100 text-red-600 hover:bg-red-200' : 'bg-green-100 text-green-600 hover:bg-green-200'}`}>
-                        {s.isActive ? 'Deactivate' : 'Activate'}
+                        {s.isActive ? t('deactivate') : t('activate')}
                       </button>
                     </td>
                   </tr>

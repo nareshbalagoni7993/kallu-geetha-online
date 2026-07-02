@@ -4,11 +4,12 @@ import API from '../../api/axios';
 import Spinner from '../../components/Spinner';
 import OrderStatusBadge from '../../components/OrderStatusBadge';
 import ConfirmModal from '../../components/ConfirmModal';
+import { useLang } from '../../context/LanguageContext';
 import toast from 'react-hot-toast';
 
 const STEPS = ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered'];
 const STEP_ICONS  = { pending: '⏳', confirmed: '✅', preparing: '🍺', out_for_delivery: '🛵', delivered: '🎉' };
-const STEP_LABELS = { pending: 'Placed', confirmed: 'Confirmed', preparing: 'Preparing', out_for_delivery: 'On the Way', delivered: 'Delivered' };
+const STEP_LABELS_EN = { pending: 'Placed', confirmed: 'Confirmed', preparing: 'Preparing', out_for_delivery: 'On the Way', delivered: 'Delivered' };
 
 const calcDistance = (lat1, lng1, lat2, lng2) => {
   if (!lat1 || !lat2 || !lng1 || !lng2) return null;
@@ -22,6 +23,7 @@ const paymentIcon  = (m) => ({ cod: '💵', online: '💳', phonepe: '📱' }[m]
 const paymentLabel = (m) => ({ cod: 'Cash on Delivery', online: 'Razorpay', phonepe: 'PhonePe' }[m] || m);
 
 export default function OrderDetail() {
+  const { t }         = useLang();
   const { orderId }   = useParams();
   const navigate      = useNavigate();
   const [searchParams] = useSearchParams();
@@ -91,23 +93,23 @@ export default function OrderDetail() {
     : null;
 
   const statusMsg = {
-    out_for_delivery: '🛵 Delivery partner is on the way!',
-    preparing:        '🍺 Your order is being prepared!',
-    confirmed:        '✅ Order confirmed — shop is getting ready',
-    pending:          '⏳ Waiting for shop confirmation',
+    out_for_delivery: t('msg_out_for_delivery'),
+    preparing:        t('msg_preparing'),
+    confirmed:        t('msg_confirmed'),
+    pending:          t('msg_pending'),
   }[order.status] || '';
 
   return (
     <div className="max-w-xl mx-auto space-y-4">
       <button onClick={() => navigate('/my-orders')}
         className="text-primary text-sm hover:underline flex items-center gap-1">
-        ← Back to Orders
+        {t('backToOrders')}
       </button>
 
       {/* ── Order Number & Status ── */}
       <div className="card p-5">
         <div className="flex justify-between items-center mb-1">
-          <h1 className="text-lg font-bold text-gray-800">Order Details</h1>
+          <h1 className="text-lg font-bold text-gray-800">{t('orderDetails')}</h1>
           <OrderStatusBadge status={order.status} />
         </div>
         <p className="text-xs text-gray-400 font-mono mb-1">{order.orderNumber}</p>
@@ -116,7 +118,7 @@ export default function OrderDetail() {
         {isCancelled ? (
           <div className="text-center py-4 bg-red-50 rounded-xl">
             <div className="text-4xl mb-2">❌</div>
-            <p className="font-semibold text-red-600">Order Cancelled</p>
+            <p className="font-semibold text-red-600">{t('orderCancelled')}</p>
           </div>
         ) : (
           <div className="flex items-start justify-between relative mb-2">
@@ -126,13 +128,14 @@ export default function OrderDetail() {
             </div>
             {STEPS.map((step, i) => {
               const done = i <= stepIndex;
+              const stepLabel = step === 'pending' ? t('placed') : step === 'out_for_delivery' ? t('onTheWay') : t(`status_${step}`);
               return (
                 <div key={step} className="flex flex-col items-center z-10 flex-1">
                   <div className={`w-9 h-9 rounded-full flex items-center justify-center text-base border-2 transition-all ${done ? 'bg-primary border-primary text-white shadow-md' : 'bg-white border-gray-300 text-gray-400'}`}>
                     {STEP_ICONS[step]}
                   </div>
                   <p className={`text-xs mt-1.5 font-medium text-center leading-tight ${done ? 'text-primary' : 'text-gray-400'}`}>
-                    {STEP_LABELS[step]}
+                    {stepLabel || STEP_LABELS_EN[step]}
                   </p>
                 </div>
               );
@@ -166,18 +169,18 @@ export default function OrderDetail() {
             <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-green-200 mb-3">
               <span className="text-2xl">📍</span>
               <div className="flex-1">
-                <p className="font-bold text-gray-800">{distance} km from you</p>
+                <p className="font-bold text-gray-800">{distance} {t('kmFromYou')}</p>
                 <p className="text-xs text-gray-500">
                   {order.status === 'out_for_delivery'
-                    ? `Estimated arrival: ~${Math.ceil(Number(distance) * 4)} min`
-                    : `Shop is ${distance} km from your location`}
+                    ? `${t('estimatedArrival')}: ~${Math.ceil(Number(distance) * 4)} min`
+                    : `${t('shopIs')} ${distance} ${t('kmFromLocation')}`}
                 </p>
               </div>
             </div>
           ) : (
             <div className="flex items-center gap-2 p-3 bg-white rounded-xl border border-green-200 mb-3 text-xs text-gray-500">
               <span>📍</span>
-              <span>Allow location access to see distance to shop</span>
+              <span>{t('allowLocation')}</span>
             </div>
           )}
 
@@ -197,7 +200,7 @@ export default function OrderDetail() {
           {mapsUrl && (
             <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded-xl transition-colors w-full">
-              🗺️ Get Directions to Shop
+              {t('getDirections')}
             </a>
           )}
         </div>
@@ -211,7 +214,7 @@ export default function OrderDetail() {
             <p className="text-sm text-gray-500">📍 {order.shop?.address?.city}</p>
             {order.shop?.phone && (
               <a href={`tel:${order.shop.phone}`} className="text-sm text-primary hover:underline mt-1 block">
-                📞 {order.shop?.phone}
+                {t('callShop')} {order.shop?.phone}
               </a>
             )}
           </div>
@@ -226,7 +229,7 @@ export default function OrderDetail() {
 
       {/* ── Items ── */}
       <div className="card p-5">
-        <h2 className="font-semibold text-gray-800 mb-3">🍺 Order Items</h2>
+        <h2 className="font-semibold text-gray-800 mb-3">{t('orderItems')}</h2>
         {order.items?.map((item, i) => (
           <div key={i} className="flex justify-between items-center py-2 border-b last:border-b-0 text-sm">
             <div className="flex items-center gap-2">
@@ -239,19 +242,19 @@ export default function OrderDetail() {
           </div>
         ))}
         <div className="pt-3 space-y-1 text-sm text-gray-600">
-          <div className="flex justify-between"><span>Subtotal</span><span>₹{order.totalAmount}</span></div>
-          <div className="flex justify-between"><span>Delivery charge</span>
-            <span>{order.deliveryCharge === 0 ? <span className="text-green-600">FREE</span> : `₹${order.deliveryCharge}`}</span>
+          <div className="flex justify-between"><span>{t('subtotal')}</span><span>₹{order.totalAmount}</span></div>
+          <div className="flex justify-between"><span>{t('deliveryCharge')}</span>
+            <span>{order.deliveryCharge === 0 ? <span className="text-green-600">{t('free')}</span> : `₹${order.deliveryCharge}`}</span>
           </div>
           <div className="flex justify-between font-bold text-gray-800 text-base border-t pt-2 mt-1">
-            <span>Grand Total</span><span>₹{order.grandTotal}</span>
+            <span>{t('grandTotal')}</span><span>₹{order.grandTotal}</span>
           </div>
         </div>
       </div>
 
       {/* ── Payment Details ── */}
       <div className="card p-5">
-        <h2 className="font-semibold text-gray-800 mb-3">💳 Payment Details</h2>
+        <h2 className="font-semibold text-gray-800 mb-3">{t('paymentDetails')}</h2>
         <div className="space-y-2">
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
             <div className="flex items-center gap-2">
@@ -269,10 +272,10 @@ export default function OrderDetail() {
               order.paymentStatus === 'failed' ? 'bg-red-100 text-red-600' :
               'bg-yellow-100 text-yellow-700'
             }`}>
-              {order.paymentStatus === 'paid'    ? '✓ Paid'
-               : order.paymentStatus === 'failed' ? '✗ Failed'
-               : order.paymentMethod === 'cod'    ? '💵 Pay on Delivery'
-               : '⏳ Pending'}
+              {order.paymentStatus === 'paid'    ? t('paid')
+               : order.paymentStatus === 'failed' ? t('failed')
+               : order.paymentMethod === 'cod'    ? t('payOnDelivery')
+               : t('pending')}
             </span>
           </div>
           {order.paymentMethod === 'cod' && !['delivered', 'cancelled'].includes(order.status) && (
@@ -291,7 +294,7 @@ export default function OrderDetail() {
       {/* ── Delivery Address ── */}
       <div className="card p-5">
         <div className="flex items-center justify-between mb-2">
-          <h2 className="font-semibold text-gray-800">📍 Delivery Address</h2>
+          <h2 className="font-semibold text-gray-800">{t('deliveryAddressLabel')}</h2>
           {delivMapUrl && (
             <a href={delivMapUrl} target="_blank" rel="noopener noreferrer"
               className="text-xs text-blue-600 font-semibold hover:underline">🗺️ View on Map</a>
@@ -316,15 +319,15 @@ export default function OrderDetail() {
       {['pending', 'confirmed'].includes(order.status) && (
         <button onClick={() => setShowCancel(true)}
           className="w-full py-3 bg-red-50 text-red-600 border border-red-200 rounded-xl font-medium hover:bg-red-100 transition-colors">
-          ✕ Cancel Order
+          ✕ {t('cancelOrder')}
         </button>
       )}
 
       {showCancel && (
         <ConfirmModal
-          title="Cancel Order?"
-          message="Are you sure you want to cancel this order? This action cannot be undone."
-          confirmLabel="Yes, Cancel"
+          title={t('cancelOrderQ')}
+          message={t('cancelConfirmMsg')}
+          confirmLabel={t('yesCancel')}
           confirmColor="red"
           loading={cancelling}
           onConfirm={handleCancel}

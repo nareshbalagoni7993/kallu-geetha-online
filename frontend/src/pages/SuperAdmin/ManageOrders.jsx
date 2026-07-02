@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import API from '../../api/axios';
 import Spinner from '../../components/Spinner';
 import OrderStatusBadge from '../../components/OrderStatusBadge';
+import { useLang } from '../../context/LanguageContext';
 
 export default function SAManageOrders() {
+  const { t }                 = useLang();
   const [orders, setOrders]   = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter]   = useState('all');
@@ -18,7 +20,7 @@ export default function SAManageOrders() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">All Orders ({orders.length})</h1>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">{t('manageOrders')} ({orders.length})</h1>
 
       <div className="flex gap-2 mb-6 flex-wrap">
         {['all','pending','confirmed','preparing','out_for_delivery','delivered','cancelled'].map((s) => (
@@ -34,13 +36,13 @@ export default function SAManageOrders() {
         <table className="w-full text-sm min-w-[640px]">
           <thead className="bg-gray-50 border-b">
             <tr>
-              <th className="text-left p-4 font-medium text-gray-600">Order #</th>
-              <th className="text-left p-4 font-medium text-gray-600">Customer</th>
-              <th className="text-left p-4 font-medium text-gray-600">Shop</th>
-              <th className="text-left p-4 font-medium text-gray-600">Items</th>
-              <th className="text-left p-4 font-medium text-gray-600">Amount</th>
-              <th className="text-left p-4 font-medium text-gray-600">Status</th>
-              <th className="text-left p-4 font-medium text-gray-600">Date</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('orders')}</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('customer')}</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('shop')}</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('items')}</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('amount')}</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('status')}</th>
+              <th className="text-left p-4 font-medium text-gray-600">{t('time')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">

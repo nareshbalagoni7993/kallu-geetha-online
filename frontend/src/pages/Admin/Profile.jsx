@@ -3,8 +3,10 @@ import API from '../../api/axios';
 import Spinner from '../../components/Spinner';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
+import { useLang } from '../../context/LanguageContext';
 
 export default function AdminProfile() {
+  const { t } = useLang();
   const { user: authUser, updateUser } = useAuth();
   const [profile, setProfile]   = useState(null);
   const [loading, setLoading]   = useState(true);
@@ -73,7 +75,7 @@ export default function AdminProfile() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold text-gray-800">My Profile</h1>
+      <h1 className="text-2xl font-bold text-gray-800">{t('myProfile')}</h1>
 
       {/* Profile Card */}
       <div className="card p-6">
@@ -106,19 +108,19 @@ export default function AdminProfile() {
 
         {/* Edit Form */}
         <form onSubmit={handleProfileSave} className="space-y-4">
-          <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Edit Info</h3>
+          <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide">{t('editInfo')}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('fullName')}</label>
               <input className="input-field" value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })} required />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('emailAddress')}</label>
               <input className="input-field bg-gray-50 cursor-not-allowed" value={profile?.email} readOnly />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('mobileNumber')}</label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">📞</span>
                 <input className="input-field pl-9" placeholder="+91 XXXXX XXXXX" value={form.phone}
@@ -136,20 +138,20 @@ export default function AdminProfile() {
             )}
           </div>
           <button type="submit" disabled={saving} className="btn-primary px-8 disabled:opacity-60">
-            {saving ? 'Saving...' : '✓ Save Changes'}
+            {saving ? t('saving') : `✓ ${t('saveChanges')}`}
           </button>
         </form>
       </div>
 
       {/* Account Info */}
       <div className="card p-6">
-        <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-4">Account Info</h3>
+        <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-4">{t('accountInfo')}</h3>
         <div className="grid grid-cols-2 gap-4">
           {[
-            { label: 'Account Type', value: profile?.role?.toUpperCase(), icon: '👤' },
-            { label: 'Member Since', value: new Date(profile?.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }), icon: '📅' },
-            { label: 'Status', value: profile?.isActive ? 'Active' : 'Inactive', icon: '🟢' },
-            { label: 'Shop', value: profile?.shop?.name || 'No shop', icon: '🏪' },
+            { label: t('accountType'), value: profile?.role?.toUpperCase(), icon: '👤' },
+            { label: t('memberSince'), value: new Date(profile?.createdAt).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' }), icon: '📅' },
+            { label: t('status'), value: profile?.isActive ? t('active') : t('inactive'), icon: '🟢' },
+            { label: t('shop'), value: profile?.shop?.name || 'No shop', icon: '🏪' },
           ].map((item) => (
             <div key={item.label} className="bg-gray-50 rounded-xl p-3">
               <p className="text-xs text-gray-400 mb-0.5">{item.icon} {item.label}</p>
@@ -161,10 +163,10 @@ export default function AdminProfile() {
 
       {/* Change Password */}
       <div className="card p-6">
-        <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-4">🔒 Change Password</h3>
+        <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wide mb-4">{t('changePasswordTitle')}</h3>
         <form onSubmit={handlePasswordChange} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('currentPassword')}</label>
             <div className="relative">
               <input type={showCurrentPw ? 'text' : 'password'} className="input-field pr-10"
                 placeholder="Enter current password" value={pwForm.currentPassword}
@@ -177,7 +179,7 @@ export default function AdminProfile() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('newPassword')}</label>
               <div className="relative">
                 <input type={showNewPw ? 'text' : 'password'} className="input-field pr-10"
                   placeholder="Min 6 characters" value={pwForm.newPassword}
@@ -189,7 +191,7 @@ export default function AdminProfile() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('confirmPassword')}</label>
               <input type="password" className={`input-field ${pwForm.confirmPassword && pwForm.confirmPassword !== pwForm.newPassword ? 'border-red-400' : ''}`}
                 placeholder="Repeat new password" value={pwForm.confirmPassword}
                 onChange={(e) => setPwForm({ ...pwForm, confirmPassword: e.target.value })} required />
@@ -210,7 +212,7 @@ export default function AdminProfile() {
           )}
           <button type="submit" disabled={pwSaving || (pwForm.confirmPassword && pwForm.confirmPassword !== pwForm.newPassword)}
             className="bg-amber-600 hover:bg-amber-700 text-white px-8 py-2.5 rounded-xl font-medium transition-colors disabled:opacity-60">
-            {pwSaving ? 'Changing...' : '🔒 Change Password'}
+            {pwSaving ? t('changing') : t('changePasswordBtn')}
           </button>
         </form>
       </div>
