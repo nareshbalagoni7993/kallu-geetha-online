@@ -28,7 +28,15 @@ export default function Register() {
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-amber-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="text-6xl mb-3">🌴</div>
+          <div className="flex justify-center mb-4">
+            <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-primary shadow-xl">
+              <img
+                src="/toddy-tapper.jpg"
+                alt="Toddy Tapper"
+                className="w-full h-full object-cover object-top"
+              />
+            </div>
+          </div>
           <h1 className="text-3xl font-bold text-primary">Geetha Online</h1>
           <p className="text-gray-500 mt-1">Premium Toddy Delivery Service</p>
         </div>
