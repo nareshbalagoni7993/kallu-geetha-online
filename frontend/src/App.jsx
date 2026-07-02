@@ -6,10 +6,11 @@ import Register from './pages/Auth/Register';
 
 import SuperAdminLayout  from './pages/SuperAdmin/Layout';
 import SADashboard       from './pages/SuperAdmin/Dashboard';
-import SAManageAdmins    from './pages/SuperAdmin/ManageAdmins';
-import SAManageShops     from './pages/SuperAdmin/ManageShops';
-import SAManageOrders    from './pages/SuperAdmin/ManageOrders';
-import SAManageUsers     from './pages/SuperAdmin/ManageUsers';
+import SAManageAdmins      from './pages/SuperAdmin/ManageAdmins';
+import SAManageShops       from './pages/SuperAdmin/ManageShops';
+import SAManageOrders      from './pages/SuperAdmin/ManageOrders';
+import SAManageUsers       from './pages/SuperAdmin/ManageUsers';
+import SAManageCategories  from './pages/SuperAdmin/ManageCategories';
 
 import AdminLayout       from './pages/Admin/Layout';
 import AdminDashboard    from './pages/Admin/Dashboard';
@@ -53,10 +54,11 @@ export default function App() {
           <ProtectedRoute role={['superadmin']}><SuperAdminLayout /></ProtectedRoute>
         }>
           <Route index          element={<SADashboard />} />
-          <Route path="admins"  element={<SAManageAdmins />} />
-          <Route path="shops"   element={<SAManageShops />} />
-          <Route path="orders"  element={<SAManageOrders />} />
-          <Route path="users"   element={<SAManageUsers />} />
+          <Route path="admins"      element={<SAManageAdmins />} />
+          <Route path="shops"       element={<SAManageShops />} />
+          <Route path="orders"      element={<SAManageOrders />} />
+          <Route path="users"       element={<SAManageUsers />} />
+          <Route path="categories"  element={<SAManageCategories />} />
         </Route>
 
         {/* Admin */}

@@ -4,21 +4,10 @@ import API from '../../api/axios';
 import Spinner from '../../components/Spinner';
 import toast from 'react-hot-toast';
 
-const CATEGORIES = [
-  { value: '',               label: '🏠 All' },
-  { value: 'toddy_shop',    label: '🍺 Toddy' },
-  { value: 'palm_products', label: '🌴 Palm' },
-  { value: 'fruit_shop',    label: '🍎 Fruits' },
-  { value: 'ice_shop',      label: '🧊 Ice' },
-];
-
-const CATEGORY_LABELS = {
-  toddy_shop: '🍺 Toddy Shop', palm_products: '🌴 Palm Products',
-  fruit_shop: '🍎 Fruit Shop', ice_shop: '🧊 Ice Shop', other: '🏪 Other',
-};
-
 export default function Home() {
   const [shops, setShops]       = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [catMap, setCatMap]     = useState({});
   const [loading, setLoading]   = useState(true);
   const [category, setCategory] = useState('');
   const [search, setSearch]     = useState('');
@@ -30,12 +19,22 @@ export default function Home() {
   // Load all shops immediately on mount — don't wait for location
   const loadShops = useCallback((lat, lng, cat) => {
     setLoading(true);
-    const params = new URLSearchParams({ radius: 100 });
+    const params = new URLSearchParams();
     if (lat != null) { params.set('lat', lat); params.set('lng', lng); }
     if (cat) params.set('category', cat);
     API.get(`/user/shops/nearby?${params}`)
       .then((r) => setShops(r.data))
+      .catch(() => {})
       .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    API.get('/user/categories').then(({ data }) => {
+      setCategories(data);
+      const m = {};
+      data.forEach((c) => { m[c.value] = `${c.icon} ${c.label}`; });
+      setCatMap(m);
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -122,10 +121,14 @@ export default function Home() {
 
       {/* Category Filter */}
       <div className="flex gap-2 overflow-x-auto pb-2 mb-5">
-        {CATEGORIES.map((c) => (
+        <button onClick={() => { setCategory(''); setSearch(''); }}
+          className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors ${category === '' ? 'bg-primary text-white' : 'bg-white text-gray-600 border hover:bg-green-50'}`}>
+          🏠 All
+        </button>
+        {categories.map((c) => (
           <button key={c.value} onClick={() => { setCategory(c.value); setSearch(''); }}
             className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-colors ${category === c.value ? 'bg-primary text-white' : 'bg-white text-gray-600 border hover:bg-green-50'}`}>
-            {c.label}
+            {c.icon} {c.label}
           </button>
         ))}
       </div>
@@ -154,7 +157,7 @@ export default function Home() {
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-green-700 via-green-600 to-amber-700 flex flex-col items-center justify-center gap-1">
                         <span className="text-6xl drop-shadow-lg">🌴</span>
-                        <span className="text-white/70 text-xs font-medium">{CATEGORY_LABELS[shop.category]}</span>
+                        <span className="text-white/70 text-xs font-medium">{catMap[shop.category] || shop.category}</span>
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
@@ -170,7 +173,7 @@ export default function Home() {
                   {/* Info */}
                   <div className="p-4">
                     <h3 className="font-bold text-gray-800 group-hover:text-primary transition-colors text-base">{shop.name}</h3>
-                    <p className="text-xs text-gray-400 mt-0.5 mb-2">📍 {shop.address?.city} · {CATEGORY_LABELS[shop.category] || shop.category}</p>
+                    <p className="text-xs text-gray-400 mt-0.5 mb-2">📍 {shop.address?.city} · {catMap[shop.category] || shop.category}</p>
                     <div className="flex gap-3 text-sm">
                       <span className="flex items-center gap-1 text-amber-600 font-medium">⭐ {shop.rating?.toFixed(1)}</span>
                       <span className="text-gray-400">·</span>

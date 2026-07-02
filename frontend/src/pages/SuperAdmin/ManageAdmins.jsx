@@ -4,14 +4,6 @@ import Spinner from '../../components/Spinner';
 import toast from 'react-hot-toast';
 import { DISTRICTS } from '../../data/telangana';
 
-const CATEGORIES = [
-  { value: 'toddy_shop',    label: '🍺 Toddy Shop' },
-  { value: 'palm_products', label: '🌴 Palm Products' },
-  { value: 'fruit_shop',    label: '🍎 Fruit Shop' },
-  { value: 'ice_shop',      label: '🧊 Ice Shop' },
-  { value: 'other',         label: '🏪 Other' },
-];
-
 const emptyForm = {
   name: '', email: '', password: '', phone: '',
   shopName: '', shopCategory: 'toddy_shop', shopPhone: '',
@@ -19,15 +11,22 @@ const emptyForm = {
 };
 
 export default function SAManageAdmins() {
-  const [admins, setAdmins]     = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [form, setForm]         = useState(emptyForm);
-  const [saving, setSaving]     = useState(false);
+  const [admins, setAdmins]         = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [showForm, setShowForm]     = useState(false);
+  const [form, setForm]             = useState(emptyForm);
+  const [saving, setSaving]         = useState(false);
 
   const fetchAdmins = () => {
     setLoading(true);
-    API.get('/superadmin/admins').then((r) => setAdmins(r.data)).finally(() => setLoading(false));
+    Promise.all([
+      API.get('/superadmin/admins'),
+      API.get('/superadmin/categories'),
+    ]).then(([a, c]) => {
+      setAdmins(a.data);
+      setCategories(c.data);
+    }).finally(() => setLoading(false));
   };
   useEffect(() => { fetchAdmins(); }, []);
 
@@ -112,7 +111,10 @@ export default function SAManageAdmins() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Shop Category</label>
                   <select className="input-field" value={form.shopCategory} onChange={(e) => set('shopCategory', e.target.value)}>
-                    {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
+                    {categories.length === 0
+                      ? <option value="">Loading...</option>
+                      : categories.map((c) => <option key={c.value} value={c.value}>{c.icon} {c.label}</option>)
+                    }
                   </select>
                 </div>
                 <div>
@@ -216,9 +218,12 @@ export default function SAManageAdmins() {
                     : <span className="text-gray-400 text-xs">No shop</span>}
                 </td>
                 <td className="p-4 text-xs text-gray-500">
-                  {a.shop?.address?.district
-                    ? <span>{a.shop.address.mandal && `${a.shop.address.mandal}, `}{a.shop.address.district}</span>
-                    : a.shop?.address?.city || '—'}
+                  {(() => {
+                    const addr = a.shop?.address;
+                    if (!addr) return '—';
+                    const parts = [addr.mandal, addr.district || addr.city || addr.village].filter(Boolean);
+                    return parts.length ? parts.join(', ') : '—';
+                  })()}
                 </td>
                 <td className="p-4">
                   <span className={a.isActive ? 'badge-green' : 'badge-red'}>

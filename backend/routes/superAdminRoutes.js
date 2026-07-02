@@ -16,7 +16,14 @@ router.get('/users', ctrl.getAllUsers);
 router.get('/shops', ctrl.getAllShops);
 router.get('/shop/:id/details', ctrl.getShopDetails);
 router.patch('/shop/:id/toggle', ctrl.toggleShopStatus);
+router.patch('/shop/:id/name', ctrl.updateShopName);
+router.delete('/shop/:id', ctrl.deleteShop);
 
 router.get('/orders', ctrl.getAllOrders);
+
+// Categories
+router.get('/categories',         ctrl.getCategories);
+router.post('/categories',        ctrl.createCategory);
+router.delete('/category/:id',    ctrl.deleteCategory);
 
 module.exports = router;

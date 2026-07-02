@@ -1,6 +1,7 @@
-const Shop    = require('../models/Shop');
-const Product = require('../models/Product');
-const Order   = require('../models/Order');
+const Shop         = require('../models/Shop');
+const Product      = require('../models/Product');
+const Order        = require('../models/Order');
+const Notification = require('../models/Notification');
 
 const calcDistance = (lat1, lng1, lat2, lng2) => {
   const R = 6371;
@@ -16,7 +17,7 @@ const calcDistance = (lat1, lng1, lat2, lng2) => {
 
 exports.getNearbyShops = async (req, res) => {
   try {
-    const { lat, lng, radius = 50, category } = req.query;
+    const { lat, lng, category } = req.query;
 
     const filter = { isActive: true };
     if (category) filter.category = category;
@@ -24,15 +25,22 @@ exports.getNearbyShops = async (req, res) => {
     const shops = await Shop.find(filter).populate('owner', 'name');
 
     let result = shops.map((shop) => {
-      const distance = lat && lng
+      // Only calculate real distance if BOTH user and shop have valid coordinates
+      const shopHasCoords = shop.address.lat !== 0 || shop.address.lng !== 0;
+      const distance = (lat && lng && shopHasCoords)
         ? calcDistance(parseFloat(lat), parseFloat(lng), shop.address.lat, shop.address.lng)
         : 0;
       return { ...shop.toObject(), distance: parseFloat(distance.toFixed(1)) };
     });
 
+    // Sort by distance when user location is known (shops without coords go last)
     if (lat && lng) {
-      result = result.filter((s) => s.distance <= parseFloat(radius));
-      result.sort((a, b) => a.distance - b.distance);
+      result.sort((a, b) => {
+        if (a.distance === 0 && b.distance === 0) return 0;
+        if (a.distance === 0) return 1;
+        if (b.distance === 0) return -1;
+        return a.distance - b.distance;
+      });
     }
 
     res.json(result);
@@ -95,7 +103,47 @@ exports.placeOrder = async (req, res) => {
       statusHistory: [{ status: 'pending', note: 'Order placed' }],
     });
 
-    await order.populate('shop', 'name image deliveryTime');
+    await order.populate('shop', 'name image deliveryTime owner');
+
+    // Persist notification to DB (admin sees it even if offline)
+    let savedNotif = null;
+    try {
+      savedNotif = await Notification.create({
+        type:        'new_order',
+        adminId:     shop.owner,
+        orderId:     order._id,
+        orderNumber: order.orderNumber,
+        amount:      order.grandTotal,
+        customer:    req.user.name,
+        shopName:    shop.name,
+        payMethod:   order.paymentMethod,
+      });
+    } catch (e) {
+      console.error('[Notification] DB save failed:', e.message);
+    }
+
+    // Also push real-time via socket (for live updates if admin is online)
+    if (global.io) {
+      const payload = {
+        _id:         savedNotif?._id,
+        type:        'new_order',
+        orderId:     order._id,
+        orderNumber: order.orderNumber,
+        amount:      order.grandTotal,
+        customer:    req.user.name,
+        shopName:    shop.name,
+        payMethod:   order.paymentMethod,
+        createdAt:   savedNotif?.createdAt || new Date().toISOString(),
+        read:        false,
+      };
+      const adminRoom = `admin_${shop.owner}`;
+      console.log(`[Socket] emitting new_order to room: ${adminRoom}`);
+      global.io.to(adminRoom).emit('notification', payload);
+      global.io.to('superadmin').emit('notification', payload);
+    } else {
+      console.warn('[Socket] global.io not available — live notification not sent');
+    }
+
     res.status(201).json(order);
   } catch (err) {
     res.status(500).json({ message: err.message });

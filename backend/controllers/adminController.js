@@ -1,9 +1,10 @@
-const Shop    = require('../models/Shop');
-const Product = require('../models/Product');
-const Order   = require('../models/Order');
-const User    = require('../models/User');
-const bcrypt  = require('bcryptjs');
-const path    = require('path');
+const Shop         = require('../models/Shop');
+const Product      = require('../models/Product');
+const Order        = require('../models/Order');
+const User         = require('../models/User');
+const Notification = require('../models/Notification');
+const bcrypt       = require('bcryptjs');
+const path         = require('path');
 
 const fileUrl = (req, file) => {
   if (!file) return '';
@@ -234,57 +235,152 @@ exports.changePassword = async (req, res) => {
 
 // ─── Dashboard ──────────────────────────────────────────────────────────────
 
+// ─── helpers ─────────────────────────────────────────────────────────────────
+const last7Days = () => Array.from({ length: 7 }, (_, i) => {
+  const d = new Date(); d.setDate(d.getDate() - (6 - i)); d.setHours(0,0,0,0);
+  return { dateStr: d.toISOString().split('T')[0], label: d.toLocaleDateString('en-US', { weekday: 'short' }) };
+});
+
+const last6Months = () => Array.from({ length: 6 }, (_, i) => {
+  const d = new Date(); d.setMonth(d.getMonth() - (5 - i)); d.setDate(1); d.setHours(0,0,0,0);
+  return {
+    monthStr: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+    label: d.toLocaleDateString('en-US', { month: 'short' }),
+  };
+});
+
 exports.getAdminDashboard = async (req, res) => {
   try {
     const shop = await Shop.findOne({ owner: req.user._id });
     if (!shop) return res.json({ message: 'No shop yet', hasShop: false });
 
-    const [totalProducts, totalOrders, pendingOrders, deliveredOrders, allProducts] = await Promise.all([
-      Product.countDocuments({ shop: shop._id }),
-      Order.countDocuments({ shop: shop._id }),
-      Order.countDocuments({ shop: shop._id, status: 'pending' }),
-      Order.countDocuments({ shop: shop._id, status: 'delivered' }),
-      Product.find({ shop: shop._id, isActive: true }).sort('category name'),
-    ]);
+    const now          = new Date();
+    const weekAgo      = new Date(now - 7  * 86400000);
+    const twoWeeksAgo  = new Date(now - 14 * 86400000);
+    const sixMonthsAgo = new Date(now); sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-    const revenue = await Order.aggregate([
+    const [totalProducts, totalOrders, pendingOrders, deliveredOrders, allProducts,
+           thisWeekAgg, lastWeekAgg, statusBreakdown, dailyRaw, monthlyRaw, paymentBreakdown, recentOrders] =
+      await Promise.all([
+        Product.countDocuments({ shop: shop._id }),
+        Order.countDocuments({ shop: shop._id }),
+        Order.countDocuments({ shop: shop._id, status: 'pending' }),
+        Order.countDocuments({ shop: shop._id, status: 'delivered' }),
+        Product.find({ shop: shop._id, isActive: true }).sort('category name'),
+
+        // this week revenue
+        Order.aggregate([
+          { $match: { shop: shop._id, createdAt: { $gte: weekAgo }, status: { $ne: 'cancelled' } } },
+          { $group: { _id: null, total: { $sum: '$grandTotal' }, count: { $sum: 1 } } },
+        ]),
+        // last week revenue
+        Order.aggregate([
+          { $match: { shop: shop._id, createdAt: { $gte: twoWeeksAgo, $lt: weekAgo }, status: { $ne: 'cancelled' } } },
+          { $group: { _id: null, total: { $sum: '$grandTotal' }, count: { $sum: 1 } } },
+        ]),
+        // order status breakdown
+        Order.aggregate([
+          { $match: { shop: shop._id } },
+          { $group: { _id: '$status', count: { $sum: 1 } } },
+        ]),
+        // daily revenue last 7 days
+        Order.aggregate([
+          { $match: { shop: shop._id, createdAt: { $gte: weekAgo }, status: { $ne: 'cancelled' } } },
+          { $group: {
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: 'Asia/Kolkata' } },
+            revenue: { $sum: '$grandTotal' }, orders: { $sum: 1 },
+          }},
+          { $sort: { _id: 1 } },
+        ]),
+        // monthly revenue last 6 months
+        Order.aggregate([
+          { $match: { shop: shop._id, createdAt: { $gte: sixMonthsAgo }, status: { $ne: 'cancelled' } } },
+          { $group: {
+            _id: { $dateToString: { format: '%Y-%m', date: '$createdAt', timezone: 'Asia/Kolkata' } },
+            revenue: { $sum: '$grandTotal' }, orders: { $sum: 1 },
+          }},
+          { $sort: { _id: 1 } },
+        ]),
+        // payment breakdown
+        Order.aggregate([
+          { $match: { shop: shop._id } },
+          { $group: { _id: '$paymentMethod', count: { $sum: 1 }, total: { $sum: '$grandTotal' } } },
+        ]),
+        // recent orders
+        Order.find({ shop: shop._id }).sort('-createdAt').limit(8).populate('user', 'name phone'),
+      ]);
+
+    // Stock summary
+    const totalStockQty   = allProducts.reduce((s, p) => s + (p.stockQty || 0), 0);
+    const totalStockValue = allProducts.reduce((s, p) => s + (p.stockQty || 0) * p.price, 0);
+    const outOfStockCount = allProducts.filter((p) => !p.inStock || p.stockQty === 0).length;
+    const lowStockProducts = allProducts.filter((p) => p.inStock && p.stockQty > 0 && p.stockQty <= 5);
+
+    // Fill daily chart data (7 days, zero-fill missing)
+    const dayMap = {}; dailyRaw.forEach((d) => { dayMap[d._id] = d; });
+    const dailyChart = last7Days().map(({ dateStr, label }) => ({
+      label, value: dayMap[dateStr]?.revenue || 0, orders: dayMap[dateStr]?.orders || 0,
+    }));
+
+    // Fill monthly chart data (6 months, zero-fill missing)
+    const monthMap = {}; monthlyRaw.forEach((m) => { monthMap[m._id] = m; });
+    const monthlyChart = last6Months().map(({ monthStr, label }) => ({
+      label, value: monthMap[monthStr]?.revenue || 0, orders: monthMap[monthStr]?.orders || 0,
+    }));
+
+    const thisWeekRevenue  = thisWeekAgg[0]?.total || 0;
+    const lastWeekRevenue  = lastWeekAgg[0]?.total || 0;
+    const thisWeekOrders   = thisWeekAgg[0]?.count || 0;
+    const lastWeekOrders   = lastWeekAgg[0]?.count || 0;
+    const revenueGrowth    = lastWeekRevenue > 0 ? (((thisWeekRevenue - lastWeekRevenue) / lastWeekRevenue) * 100).toFixed(1) : null;
+    const ordersGrowth     = lastWeekOrders  > 0 ? (((thisWeekOrders  - lastWeekOrders)  / lastWeekOrders)  * 100).toFixed(1) : null;
+
+    const totalRevenue = await Order.aggregate([
       { $match: { shop: shop._id, status: 'delivered' } },
       { $group: { _id: null, total: { $sum: '$grandTotal' } } },
     ]);
 
-    // Stock summary
-    const totalStockQty    = allProducts.reduce((s, p) => s + (p.stockQty || 0), 0);
-    const totalStockValue  = allProducts.reduce((s, p) => s + (p.stockQty || 0) * p.price, 0);
-    const outOfStockCount  = allProducts.filter((p) => !p.inStock || p.stockQty === 0).length;
-    const lowStockProducts = allProducts.filter((p) => p.inStock && p.stockQty > 0 && p.stockQty <= 5);
-
-    // Payment breakdown
-    const paymentBreakdown = await Order.aggregate([
-      { $match: { shop: shop._id } },
-      { $group: { _id: '$paymentMethod', count: { $sum: 1 }, total: { $sum: '$grandTotal' } } },
-    ]);
-
-    const recentOrders = await Order.find({ shop: shop._id })
-      .sort('-createdAt').limit(5)
-      .populate('user', 'name phone');
+    const statusMap = {};
+    statusBreakdown.forEach((s) => { statusMap[s._id] = s.count; });
 
     res.json({
-      hasShop: true,
-      shop,
-      totalProducts,
-      totalOrders,
-      pendingOrders,
-      deliveredOrders,
-      totalRevenue:    revenue[0]?.total || 0,
-      totalStockQty,
-      totalStockValue,
-      outOfStockCount,
-      lowStockProducts,
-      allProducts,
-      paymentBreakdown,
-      recentOrders,
+      hasShop: true, shop,
+      totalProducts, totalOrders, pendingOrders, deliveredOrders,
+      totalRevenue: totalRevenue[0]?.total || 0,
+      thisWeekRevenue, lastWeekRevenue, thisWeekOrders, lastWeekOrders,
+      revenueGrowth, ordersGrowth,
+      dailyChart, monthlyChart,
+      statusBreakdown: statusMap,
+      totalStockQty, totalStockValue, outOfStockCount, lowStockProducts, allProducts,
+      paymentBreakdown, recentOrders,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
+};
+
+exports.getNotifications = async (req, res) => {
+  try {
+    const notifs = await Notification.find({ adminId: req.user._id })
+      .sort('-createdAt').limit(50);
+    res.json(notifs);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+};
+
+exports.markNotificationsRead = async (req, res) => {
+  try {
+    await Notification.updateMany({ adminId: req.user._id, read: false }, { read: true });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+};
+
+exports.testNotification = async (req, res) => {
+  if (!global.io) return res.status(500).json({ message: 'Socket not ready' });
+  const notification = {
+    type: 'new_order', orderId: 'test', orderNumber: 'ORD-TEST-001',
+    amount: 299, customer: 'Test Customer', shopName: 'Test Shop', payMethod: 'cod',
+    time: new Date().toISOString(),
+  };
+  global.io.to(`admin_${req.user._id}`).emit('notification', notification);
+  res.json({ success: true, room: `admin_${req.user._id}` });
 };

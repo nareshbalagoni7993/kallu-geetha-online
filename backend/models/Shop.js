@@ -5,11 +5,7 @@ const shopSchema = new mongoose.Schema({
   description: { type: String, default: '' },
   image:       { type: String, default: '' },
   owner:       { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  category:    {
-    type: String,
-    enum: ['toddy_shop', 'palm_products', 'fruit_shop', 'ice_shop', 'other'],
-    default: 'toddy_shop',
-  },
+  category: { type: String, default: 'toddy_shop' },
   address: {
     state:    { type: String, default: 'Telangana' },
     district: { type: String, default: '' },

@@ -1,31 +1,146 @@
-const User  = require('../models/User');
-const Shop  = require('../models/Shop');
-const Order = require('../models/Order');
-const Product = require('../models/Product');
+const User     = require('../models/User');
+const Shop     = require('../models/Shop');
+const Order    = require('../models/Order');
+const Product  = require('../models/Product');
+const Category = require('../models/Category');
+
+const DEFAULT_CATEGORIES = [
+  { value: 'toddy_shop',    label: 'Toddy Shop',    icon: '🍺' },
+  { value: 'palm_products', label: 'Palm Products',  icon: '🌴' },
+  { value: 'fruit_shop',    label: 'Fruit Shop',     icon: '🍎' },
+  { value: 'ice_shop',      label: 'Ice Shop',        icon: '🧊' },
+  { value: 'other',         label: 'Other',           icon: '🏪' },
+];
+
+exports.getCategories = async (req, res) => {
+  try {
+    let cats = await Category.find({ isActive: true }).sort('label');
+    if (cats.length === 0) {
+      cats = await Category.insertMany(DEFAULT_CATEGORIES);
+    }
+    res.json(cats);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.createCategory = async (req, res) => {
+  try {
+    const { label, icon } = req.body;
+    if (!label?.trim()) return res.status(400).json({ message: 'Label is required' });
+    const value = label.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+    const exists = await Category.findOne({ value });
+    if (exists) return res.status(400).json({ message: 'Category already exists' });
+    const cat = await Category.create({ value, label: label.trim(), icon: icon || '🏪' });
+    res.status(201).json(cat);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.deleteCategory = async (req, res) => {
+  try {
+    const cat = await Category.findByIdAndDelete(req.params.id);
+    if (!cat) return res.status(404).json({ message: 'Category not found' });
+    res.json({ message: 'Category deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const last7DaysSA = () => Array.from({ length: 7 }, (_, i) => {
+  const d = new Date(); d.setDate(d.getDate() - (6 - i)); d.setHours(0,0,0,0);
+  return { dateStr: d.toISOString().split('T')[0], label: d.toLocaleDateString('en-US', { weekday: 'short' }) };
+});
+const last6MonthsSA = () => Array.from({ length: 6 }, (_, i) => {
+  const d = new Date(); d.setMonth(d.getMonth() - (5 - i)); d.setDate(1); d.setHours(0,0,0,0);
+  return {
+    monthStr: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+    label: d.toLocaleDateString('en-US', { month: 'short' }),
+  };
+});
 
 exports.getDashboard = async (req, res) => {
   try {
-    const [totalAdmins, totalUsers, totalShops, totalOrders, recentOrders] = await Promise.all([
-      User.countDocuments({ role: 'admin' }),
-      User.countDocuments({ role: 'user' }),
-      Shop.countDocuments(),
-      Order.countDocuments(),
-      Order.find().sort('-createdAt').limit(5)
-        .populate('user', 'name email')
-        .populate('shop', 'name'),
-    ]);
+    const now         = new Date();
+    const weekAgo     = new Date(now - 7  * 86400000);
+    const twoWeeksAgo = new Date(now - 14 * 86400000);
+    const sixMoAgo    = new Date(now); sixMoAgo.setMonth(sixMoAgo.getMonth() - 6);
+
+    const [totalAdmins, totalUsers, totalShops, totalOrders,
+           thisWeekAgg, lastWeekAgg, dailyRaw, monthlyRaw,
+           shopPerformance, statusBreakdown, recentOrders] =
+      await Promise.all([
+        User.countDocuments({ role: 'admin' }),
+        User.countDocuments({ role: 'user' }),
+        Shop.countDocuments(),
+        Order.countDocuments(),
+        Order.aggregate([
+          { $match: { createdAt: { $gte: weekAgo }, status: { $ne: 'cancelled' } } },
+          { $group: { _id: null, total: { $sum: '$grandTotal' }, count: { $sum: 1 } } },
+        ]),
+        Order.aggregate([
+          { $match: { createdAt: { $gte: twoWeeksAgo, $lt: weekAgo }, status: { $ne: 'cancelled' } } },
+          { $group: { _id: null, total: { $sum: '$grandTotal' }, count: { $sum: 1 } } },
+        ]),
+        Order.aggregate([
+          { $match: { createdAt: { $gte: weekAgo }, status: { $ne: 'cancelled' } } },
+          { $group: {
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt', timezone: 'Asia/Kolkata' } },
+            revenue: { $sum: '$grandTotal' }, orders: { $sum: 1 },
+          }},
+          { $sort: { _id: 1 } },
+        ]),
+        Order.aggregate([
+          { $match: { createdAt: { $gte: sixMoAgo }, status: { $ne: 'cancelled' } } },
+          { $group: {
+            _id: { $dateToString: { format: '%Y-%m', date: '$createdAt', timezone: 'Asia/Kolkata' } },
+            revenue: { $sum: '$grandTotal' }, orders: { $sum: 1 },
+          }},
+          { $sort: { _id: 1 } },
+        ]),
+        Order.aggregate([
+          { $group: { _id: '$shop', revenue: { $sum: '$grandTotal' }, orders: { $sum: 1 } } },
+          { $sort: { revenue: -1 } }, { $limit: 5 },
+          { $lookup: { from: 'shops', localField: '_id', foreignField: '_id', as: 'shop' } },
+          { $unwind: '$shop' },
+          { $project: { shopName: '$shop.name', revenue: 1, orders: 1 } },
+        ]),
+        Order.aggregate([{ $group: { _id: '$status', count: { $sum: 1 } } }]),
+        Order.find().sort('-createdAt').limit(8)
+          .populate('user', 'name email').populate('shop', 'name'),
+      ]);
 
     const revenue = await Order.aggregate([
       { $match: { status: 'delivered' } },
       { $group: { _id: null, total: { $sum: '$grandTotal' } } },
     ]);
 
+    // Fill gaps
+    const dayMap = {}; dailyRaw.forEach((d) => { dayMap[d._id] = d; });
+    const dailyChart = last7DaysSA().map(({ dateStr, label }) => ({
+      label, value: dayMap[dateStr]?.revenue || 0, orders: dayMap[dateStr]?.orders || 0,
+    }));
+    const monthMap = {}; monthlyRaw.forEach((m) => { monthMap[m._id] = m; });
+    const monthlyChart = last6MonthsSA().map(({ monthStr, label }) => ({
+      label, value: monthMap[monthStr]?.revenue || 0, orders: monthMap[monthStr]?.orders || 0,
+    }));
+
+    const thisWeekRevenue = thisWeekAgg[0]?.total || 0;
+    const lastWeekRevenue = lastWeekAgg[0]?.total || 0;
+    const thisWeekOrders  = thisWeekAgg[0]?.count || 0;
+    const lastWeekOrders  = lastWeekAgg[0]?.count || 0;
+    const revenueGrowth   = lastWeekRevenue > 0 ? (((thisWeekRevenue - lastWeekRevenue) / lastWeekRevenue) * 100).toFixed(1) : null;
+
+    const statusMap = {};
+    statusBreakdown.forEach((s) => { statusMap[s._id] = s.count; });
+
     res.json({
-      totalAdmins,
-      totalUsers,
-      totalShops,
-      totalOrders,
+      totalAdmins, totalUsers, totalShops, totalOrders,
       totalRevenue: revenue[0]?.total || 0,
+      thisWeekRevenue, lastWeekRevenue, thisWeekOrders, lastWeekOrders, revenueGrowth,
+      dailyChart, monthlyChart, shopPerformance,
+      statusBreakdown: statusMap,
       recentOrders,
     });
   } catch (err) {
@@ -140,6 +255,28 @@ exports.toggleShopStatus = async (req, res) => {
     shop.isActive = !shop.isActive;
     await shop.save();
     res.json({ message: `Shop ${shop.isActive ? 'activated' : 'deactivated'}`, isActive: shop.isActive });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.deleteShop = async (req, res) => {
+  try {
+    const shop = await Shop.findByIdAndDelete(req.params.id);
+    if (!shop) return res.status(404).json({ message: 'Shop not found' });
+    res.json({ message: 'Shop deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.updateShopName = async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name?.trim()) return res.status(400).json({ message: 'Name is required' });
+    const shop = await Shop.findByIdAndUpdate(req.params.id, { name: name.trim() }, { new: true });
+    if (!shop) return res.status(404).json({ message: 'Shop not found' });
+    res.json(shop);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

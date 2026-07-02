@@ -6,6 +6,9 @@ const { upload } = require('../config/cloudinary');
 router.use(protect, authorize('admin', 'superadmin'));
 
 router.get('/dashboard', ctrl.getAdminDashboard);
+router.get('/notifications', ctrl.getNotifications);
+router.patch('/notifications/read', ctrl.markNotificationsRead);
+router.post('/test-notification', ctrl.testNotification);
 
 router.post('/shop', upload.single('image'), ctrl.createShop);
 router.get('/shop', ctrl.getMyShop);

@@ -28,7 +28,7 @@ export default function Spinner({ size = 'md', text = '' }) {
           <img
             src="/palm-tree.jpg"
             alt="Loading"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
           />
         </div>
       </div>
