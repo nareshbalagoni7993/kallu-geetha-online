@@ -17,7 +17,7 @@ export default function UserLayout() {
         <div className="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
           <NavLink to="/home" className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-primary shadow-sm flex-shrink-0">
-              <img src="/toddy-tapper.jpg" alt="Geetha Online" className="w-full h-full object-cover object-top" />
+              <img src="https://www.telugu360.com/wp-content/uploads/2015/08/xxx.jpg" alt="Geetha Online" className="w-full h-full object-cover object-top" />
             </div>
             <span className="font-bold text-primary text-lg">Geetha Online</span>
           </NavLink>

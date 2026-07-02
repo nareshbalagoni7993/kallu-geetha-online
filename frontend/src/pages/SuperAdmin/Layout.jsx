@@ -40,7 +40,7 @@ export default function SuperAdminLayout() {
         <div className="p-5 border-b border-green-700 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-green-400 flex-shrink-0 shadow">
-              <img src="/toddy-tapper.jpg" alt="Geetha Online" className="w-full h-full object-cover object-top" />
+              <img src="https://www.telugu360.com/wp-content/uploads/2015/08/xxx.jpg" alt="Geetha Online" className="w-full h-full object-cover object-top" />
             </div>
             <div>
               <h1 className="text-base font-bold leading-tight">Geetha Online</h1>
@@ -82,7 +82,7 @@ export default function SuperAdminLayout() {
           <button onClick={() => setSidebarOpen(true)}
             className="text-green-200 hover:text-white text-2xl leading-none">☰</button>
           <div className="w-7 h-7 rounded-full overflow-hidden border border-green-400 flex-shrink-0">
-            <img src="/toddy-tapper.jpg" alt="" className="w-full h-full object-cover object-top" />
+            <img src="https://www.telugu360.com/wp-content/uploads/2015/08/xxx.jpg" alt="" className="w-full h-full object-cover object-top" />
           </div>
           <span className="font-bold text-base flex-1">Super Admin</span>
           <span className="text-green-300 text-sm">{user?.name?.split(' ')[0]}</span>

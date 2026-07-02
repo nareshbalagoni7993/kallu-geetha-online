@@ -32,7 +32,7 @@ export default function Login() {
           <div className="flex justify-center mb-4">
             <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-primary shadow-xl">
               <img
-                src="/toddy-tapper.jpg"
+                src="https://www.telugu360.com/wp-content/uploads/2015/08/xxx.jpg"
                 alt="Toddy Tapper"
                 className="w-full h-full object-cover object-top"
               />
