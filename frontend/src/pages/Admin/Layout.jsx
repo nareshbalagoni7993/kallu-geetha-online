@@ -41,7 +41,9 @@ export default function AdminLayout() {
         {/* Brand */}
         <div className="p-5 border-b border-amber-700 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-3xl">🌴</span>
+            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-amber-400 flex-shrink-0 shadow">
+              <img src="/toddy-tapper.jpg" alt="Geetha Online" className="w-full h-full object-cover object-top" />
+            </div>
             <div>
               <h1 className="text-base font-bold leading-tight">Geetha Online</h1>
               <p className="text-amber-300 text-xs">Shop Admin Panel</p>
@@ -95,7 +97,9 @@ export default function AdminLayout() {
         <header className="lg:hidden bg-amber-900 text-white px-4 py-3 flex items-center gap-3 sticky top-0 z-20 shadow-md">
           <button onClick={() => setSidebarOpen(true)}
             className="text-amber-200 hover:text-white text-2xl leading-none">☰</button>
-          <span className="text-xl">🌴</span>
+          <div className="w-7 h-7 rounded-full overflow-hidden border border-amber-400 flex-shrink-0">
+            <img src="/toddy-tapper.jpg" alt="" className="w-full h-full object-cover object-top" />
+          </div>
           <span className="font-bold text-base flex-1">Admin Panel</span>
           <span className="text-amber-300 text-sm">{user?.name?.split(' ')[0]}</span>
         </header>

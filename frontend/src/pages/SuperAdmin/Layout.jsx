@@ -37,11 +37,15 @@ export default function SuperAdminLayout() {
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0
       `}>
-        <div className="p-6 border-b border-green-700 flex items-center justify-between">
-          <div>
-            <div className="text-3xl mb-1">🌴</div>
-            <h1 className="text-lg font-bold">Geetha Online</h1>
-            <p className="text-green-300 text-xs mt-0.5">Super Admin Panel</p>
+        <div className="p-5 border-b border-green-700 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-11 h-11 rounded-full overflow-hidden border-2 border-green-400 flex-shrink-0 shadow">
+              <img src="/toddy-tapper.jpg" alt="Geetha Online" className="w-full h-full object-cover object-top" />
+            </div>
+            <div>
+              <h1 className="text-base font-bold leading-tight">Geetha Online</h1>
+              <p className="text-green-300 text-xs mt-0.5">Super Admin Panel</p>
+            </div>
           </div>
           <button onClick={() => setSidebarOpen(false)}
             className="lg:hidden text-green-300 hover:text-white text-2xl leading-none self-start">✕</button>
@@ -77,7 +81,9 @@ export default function SuperAdminLayout() {
         <header className="lg:hidden bg-green-900 text-white px-4 py-3 flex items-center gap-3 sticky top-0 z-20 shadow-md">
           <button onClick={() => setSidebarOpen(true)}
             className="text-green-200 hover:text-white text-2xl leading-none">☰</button>
-          <span className="text-xl">🌴</span>
+          <div className="w-7 h-7 rounded-full overflow-hidden border border-green-400 flex-shrink-0">
+            <img src="/toddy-tapper.jpg" alt="" className="w-full h-full object-cover object-top" />
+          </div>
           <span className="font-bold text-base flex-1">Super Admin</span>
           <span className="text-green-300 text-sm">{user?.name?.split(' ')[0]}</span>
         </header>

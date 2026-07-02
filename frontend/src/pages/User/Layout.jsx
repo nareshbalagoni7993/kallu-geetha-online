@@ -16,7 +16,9 @@ export default function UserLayout() {
       <nav className="bg-white shadow-sm sticky top-0 z-50">
         <div className="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
           <NavLink to="/home" className="flex items-center gap-2">
-            <span className="text-2xl">🌴</span>
+            <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-primary shadow-sm flex-shrink-0">
+              <img src="/toddy-tapper.jpg" alt="Geetha Online" className="w-full h-full object-cover object-top" />
+            </div>
             <span className="font-bold text-primary text-lg">Geetha Online</span>
           </NavLink>
           <div className="flex items-center gap-3">
